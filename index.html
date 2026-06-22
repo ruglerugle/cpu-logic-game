@@ -254,50 +254,57 @@
 
 <div id="transistorModal">
   <div class="box">
-    <h2>🔬 NOTゲートの中身：トランジスタ2個</h2>
+    <h2>🔬 NOTゲートの中身：電気の「門番」が2人</h2>
     <p>
-      論理ゲートはさらに分解すると「トランジスタ」という電気スイッチでできています。
-      NOTゲート（インバータ）はたった<b>2個のトランジスタ</b>で作れます。
+      むずかしい言葉はいったん忘れてください。NOTゲートの中には、電気の通り道を
+      開けたり閉めたりする<b>「門番」が2人</b>いるだけです。
     </p>
-    <svg viewBox="0 0 360 280" style="width:100%; max-width:340px; display:block; margin:0 auto;">
-      <!-- VCC rail -->
+    <ul style="padding-left:18px; margin:10px 0;">
+      <li><b>上の門番</b>：Aが<b>OFF（0）</b>のときだけ道を開けて、電気を上から流す</li>
+      <li><b>下の門番</b>：Aが<b>ON（1）</b>のときだけ道を開けて、電気を下に流す</li>
+    </ul>
+    <p style="font-size:13px; color:#999;">
+      この「門番」が本当の名前では PMOS・NMOS と呼ばれるトランジスタです。名前は覚えなくてOK、
+      「Aの逆を見て開く扉」という動きだけ覚えれば十分です。
+    </p>
+    <div style="text-align:center; margin: 14px 0;">
+      <button id="toggleABtn" style="padding:10px 22px; font-size:15px; font-weight:bold; background:#ffd54f; color:#332600; border:none; border-radius:8px; cursor:pointer;">
+        Aを切り替える（現在: A = 0）
+      </button>
+    </div>
+    <svg id="transistorSvg" viewBox="0 0 360 280" style="width:100%; max-width:340px; display:block; margin:0 auto;">
       <line x1="180" y1="20" x2="180" y2="60" stroke="#888" stroke-width="2"/>
-      <text x="180" y="14" text-anchor="middle" fill="#ffd54f" font-size="13">VCC（電源, 1）</text>
-      <!-- PMOS -->
-      <rect x="140" y="60" width="80" height="44" rx="6" fill="#3a2d4d" stroke="#a47bd1" stroke-width="1.5"/>
-      <text x="180" y="86" text-anchor="middle" fill="#d9b8ff" font-size="12">PMOS</text>
-      <text x="180" y="100" text-anchor="middle" fill="#9c8" font-size="10">A=0で導通</text>
-      <line x1="180" y1="104" x2="180" y2="140" stroke="#888" stroke-width="2"/>
-      <!-- OUT node -->
-      <circle cx="180" cy="140" r="5" fill="#4fd1c5"/>
-      <line x1="180" y1="140" x2="280" y2="140" stroke="#4fd1c5" stroke-width="2"/>
-      <text x="290" y="144" fill="#4fd1c5" font-size="13">OUT</text>
-      <!-- NMOS -->
-      <line x1="180" y1="140" x2="180" y2="176" stroke="#888" stroke-width="2"/>
-      <rect x="140" y="176" width="80" height="44" rx="6" fill="#1f3a36" stroke="#4fd1c5" stroke-width="1.5"/>
-      <text x="180" y="202" text-anchor="middle" fill="#9fe8de" font-size="12">NMOS</text>
-      <text x="180" y="216" text-anchor="middle" fill="#9c8" font-size="10">A=1で導通</text>
+      <text x="180" y="14" text-anchor="middle" fill="#ffd54f" font-size="13">電源（つねに元気, 1）</text>
+
+      <rect id="gateTop" x="140" y="60" width="80" height="44" rx="6" fill="#3a2d4d" stroke="#a47bd1" stroke-width="1.5"/>
+      <text x="180" y="82" text-anchor="middle" fill="#d9b8ff" font-size="12">上の門番</text>
+      <text id="gateTopState" x="180" y="97" text-anchor="middle" fill="#9c8" font-size="10">開いている</text>
+      <line id="wireTop" x1="180" y1="104" x2="180" y2="140" stroke="#888" stroke-width="3"/>
+
+      <circle id="outBulb" cx="180" cy="140" r="14" fill="#333" stroke="#666" stroke-width="2"/>
+      <text x="180" y="144" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">OUT</text>
+      <text id="outValueText" x="230" y="144" fill="#4fd1c5" font-size="16" font-weight="bold">= 1</text>
+
+      <line id="wireBottom" x1="180" y1="154" x2="180" y2="176" stroke="#888" stroke-width="3"/>
+      <rect id="gateBottom" x="140" y="176" width="80" height="44" rx="6" fill="#1f3a36" stroke="#4fd1c5" stroke-width="1.5"/>
+      <text x="180" y="198" text-anchor="middle" fill="#9fe8de" font-size="12">下の門番</text>
+      <text id="gateBottomState" x="180" y="213" text-anchor="middle" fill="#9c8" font-size="10">閉まっている</text>
       <line x1="180" y1="220" x2="180" y2="256" stroke="#888" stroke-width="2"/>
-      <text x="180" y="270" text-anchor="middle" fill="#888" font-size="13">GND（接地, 0）</text>
-      <!-- A input -->
+      <text x="180" y="270" text-anchor="middle" fill="#888" font-size="13">地面（電気の捨て場, 0）</text>
+
       <line x1="60" y1="140" x2="140" y2="140" stroke="#ffd54f" stroke-width="2"/>
       <line x1="60" y1="82" x2="60" y2="198" stroke="#ffd54f" stroke-width="2"/>
       <line x1="60" y1="82" x2="140" y2="82" stroke="#ffd54f" stroke-width="2"/>
       <line x1="60" y1="198" x2="140" y2="198" stroke="#ffd54f" stroke-width="2"/>
-      <text x="30" y="144" fill="#ffd54f" font-size="13">A</text>
+      <text id="aValueText" x="20" y="144" fill="#ffd54f" font-size="14" font-weight="bold">A=0</text>
     </svg>
-    <p>
-      <b>A（入力）</b>は2つのトランジスタのスイッチ部分に同時につながっています。
+    <p id="transistorExplain" style="background:#1c2a28; border-left:3px solid var(--accent); padding:8px 10px; border-radius:4px; font-size:13px;">
+      A = 0（OFF）なので、<b>上の門番が開いて</b>電源からOUTまで電気がつながり、OUTのランプが<b>点灯（1）</b>します。下の門番は閉まっているので地面側には流れません。
     </p>
-    <table>
-      <tr><th>入力 A</th><th>PMOS（上）</th><th>NMOS（下）</th><th>OUT</th></tr>
-      <tr><td>0</td><td>導通（VCC→OUT）</td><td>遮断</td><td>1</td></tr>
-      <tr><td>1</td><td>遮断</td><td>導通（OUT→GND）</td><td>0</td></tr>
-    </table>
-    <p>
-      A=0のときは上のPMOSだけが繋がってOUTがVCC（1）に直結され、A=1のときは下のNMOSだけが繋がってOUTがGND（0）に直結されます。
-      <b>2つが同時に繋がることはない</b>ため、電流が無駄に流れ続けず、CPUの省電力にも繋がっています。
-      これを何十億個も集積して並べたものが、実際のCPUチップです。
+    <p style="font-size:13px; color:#999;">
+      ボタンでAを1に切り替えると、開く門番が反対に入れ替わって、OUTのランプが消える（0）はずです。実際に試してみてください。
+      <b>2人の門番が同時に開くことは絶対にない</b>ので、電気が無駄に流れ続けず、CPUの電力消費を抑えられます。
+      これを何十億個も小さく並べたものが、実際のCPUチップです。
     </p>
     <button class="close" id="transistorCloseBtn">閉じる</button>
   </div>
@@ -796,6 +803,38 @@ document.getElementById('introCloseBtn').addEventListener('click', ()=>{
 document.getElementById('transistorCloseBtn').addEventListener('click', ()=>{
   document.getElementById('transistorModal').style.display = 'none';
 });
+
+let transistorA = 0;
+function updateTransistorVisual(){
+  const out = transistorA ? 0 : 1;
+  document.getElementById('toggleABtn').textContent = `Aを切り替える（現在: A = ${transistorA}）`;
+  document.getElementById('aValueText').textContent = `A=${transistorA}`;
+  document.getElementById('outValueText').textContent = `= ${out}`;
+  document.getElementById('outBulb').setAttribute('fill', out ? '#ffe066' : '#333');
+  document.getElementById('outBulb').setAttribute('stroke', out ? '#ffd54f' : '#666');
+
+  const topOpen = transistorA === 0;
+  document.getElementById('gateTop').setAttribute('fill', topOpen ? '#5a4470' : '#3a2d4d');
+  document.getElementById('gateTopState').textContent = topOpen ? '開いている' : '閉まっている';
+  document.getElementById('wireTop').setAttribute('stroke', topOpen ? '#ffd54f' : '#444');
+
+  const bottomOpen = transistorA === 1;
+  document.getElementById('gateBottom').setAttribute('fill', bottomOpen ? '#2d5a52' : '#1f3a36');
+  document.getElementById('gateBottomState').textContent = bottomOpen ? '開いている' : '閉まっている';
+  document.getElementById('wireBottom').setAttribute('stroke', bottomOpen ? '#4fd1c5' : '#444');
+
+  const explain = document.getElementById('transistorExplain');
+  if (topOpen){
+    explain.innerHTML = `A = 0（OFF）なので、<b>上の門番が開いて</b>電源からOUTまで電気がつながり、OUTのランプが<b>点灯（1）</b>します。下の門番は閉まっているので地面側には流れません。`;
+  } else {
+    explain.innerHTML = `A = 1（ON）なので、今度は<b>下の門番が開いて</b>OUTから地面まで電気が流れ出てしまい、OUTのランプは<b>消灯（0）</b>します。上の門番は閉まっているので電源側からは流れません。`;
+  }
+}
+document.getElementById('toggleABtn').addEventListener('click', ()=>{
+  transistorA = transistorA ? 0 : 1;
+  updateTransistorVisual();
+});
+updateTransistorVisual();
 </script>
 </body>
 </html>
