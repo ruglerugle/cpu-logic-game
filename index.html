@@ -75,6 +75,52 @@
     font-size: 14px;
   }
   #introModal .step { color: #ffd54f; font-weight: bold; }
+  .zoomBtn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #2a2330;
+    border: 1px solid #5c4a6e;
+    border-radius: 6px;
+    color: #d9b8ff;
+    cursor: pointer;
+    font-size: 12.5px;
+  }
+  .zoomBtn:hover { background: #382c44; }
+  #transistorModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  #transistorModal .box {
+    background: var(--panel);
+    border: 1px solid #3a3f54;
+    border-radius: 10px;
+    padding: 24px 28px;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow-y: auto;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+  #transistorModal h2 { margin-top: 0; color: var(--accent); }
+  #transistorModal button.close {
+    margin-top: 16px;
+    padding: 8px 20px;
+    background: var(--accent);
+    color: #06201d;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #transistorModal table { border-collapse: collapse; margin: 10px 0; }
+  #transistorModal th, #transistorModal td { border: 1px solid #3a3f54; padding: 5px 12px; text-align: center; }
+  #transistorModal th { background: #20232f; }
   .gateBtn {
     display: block;
     width: 100%;
@@ -206,6 +252,57 @@
   </div>
 </div>
 
+<div id="transistorModal">
+  <div class="box">
+    <h2>🔬 NOTゲートの中身：トランジスタ2個</h2>
+    <p>
+      論理ゲートはさらに分解すると「トランジスタ」という電気スイッチでできています。
+      NOTゲート（インバータ）はたった<b>2個のトランジスタ</b>で作れます。
+    </p>
+    <svg viewBox="0 0 360 280" style="width:100%; max-width:340px; display:block; margin:0 auto;">
+      <!-- VCC rail -->
+      <line x1="180" y1="20" x2="180" y2="60" stroke="#888" stroke-width="2"/>
+      <text x="180" y="14" text-anchor="middle" fill="#ffd54f" font-size="13">VCC（電源, 1）</text>
+      <!-- PMOS -->
+      <rect x="140" y="60" width="80" height="44" rx="6" fill="#3a2d4d" stroke="#a47bd1" stroke-width="1.5"/>
+      <text x="180" y="86" text-anchor="middle" fill="#d9b8ff" font-size="12">PMOS</text>
+      <text x="180" y="100" text-anchor="middle" fill="#9c8" font-size="10">A=0で導通</text>
+      <line x1="180" y1="104" x2="180" y2="140" stroke="#888" stroke-width="2"/>
+      <!-- OUT node -->
+      <circle cx="180" cy="140" r="5" fill="#4fd1c5"/>
+      <line x1="180" y1="140" x2="280" y2="140" stroke="#4fd1c5" stroke-width="2"/>
+      <text x="290" y="144" fill="#4fd1c5" font-size="13">OUT</text>
+      <!-- NMOS -->
+      <line x1="180" y1="140" x2="180" y2="176" stroke="#888" stroke-width="2"/>
+      <rect x="140" y="176" width="80" height="44" rx="6" fill="#1f3a36" stroke="#4fd1c5" stroke-width="1.5"/>
+      <text x="180" y="202" text-anchor="middle" fill="#9fe8de" font-size="12">NMOS</text>
+      <text x="180" y="216" text-anchor="middle" fill="#9c8" font-size="10">A=1で導通</text>
+      <line x1="180" y1="220" x2="180" y2="256" stroke="#888" stroke-width="2"/>
+      <text x="180" y="270" text-anchor="middle" fill="#888" font-size="13">GND（接地, 0）</text>
+      <!-- A input -->
+      <line x1="60" y1="140" x2="140" y2="140" stroke="#ffd54f" stroke-width="2"/>
+      <line x1="60" y1="82" x2="60" y2="198" stroke="#ffd54f" stroke-width="2"/>
+      <line x1="60" y1="82" x2="140" y2="82" stroke="#ffd54f" stroke-width="2"/>
+      <line x1="60" y1="198" x2="140" y2="198" stroke="#ffd54f" stroke-width="2"/>
+      <text x="30" y="144" fill="#ffd54f" font-size="13">A</text>
+    </svg>
+    <p>
+      <b>A（入力）</b>は2つのトランジスタのスイッチ部分に同時につながっています。
+    </p>
+    <table>
+      <tr><th>入力 A</th><th>PMOS（上）</th><th>NMOS（下）</th><th>OUT</th></tr>
+      <tr><td>0</td><td>導通（VCC→OUT）</td><td>遮断</td><td>1</td></tr>
+      <tr><td>1</td><td>遮断</td><td>導通（OUT→GND）</td><td>0</td></tr>
+    </table>
+    <p>
+      A=0のときは上のPMOSだけが繋がってOUTがVCC（1）に直結され、A=1のときは下のNMOSだけが繋がってOUTがGND（0）に直結されます。
+      <b>2つが同時に繋がることはない</b>ため、電流が無駄に流れ続けず、CPUの省電力にも繋がっています。
+      これを何十億個も集積して並べたものが、実際のCPUチップです。
+    </p>
+    <button class="close" id="transistorCloseBtn">閉じる</button>
+  </div>
+</div>
+
 <div id="main">
   <div id="toolbar">
     <button id="runBtn" class="primary">▶ 検証する</button>
@@ -227,6 +324,7 @@ const LEVELS = [
     name: "1. NOTゲートを使う",
     desc: "入力 A を反転して出力 OUT に出してください。NOT(A) = OUT",
     cpuLink: "CPUの中身は「トランジスタ」という超小さなスイッチが何十億個も集まったものです。トランジスタを数個組み合わせると、このNOTゲートのような「論理ゲート」ができます。CPUのすべての計算は、最終的にこのゲートの組み合わせに分解されます。",
+    decompose: true,
     inputs: ["A"],
     outputs: ["OUT"],
     truth: (A) => [ (A?0:1) ],
@@ -617,7 +715,13 @@ function loadLevel(){
   const lv = LEVELS[currentLevelIdx];
   document.getElementById('levelInfo').innerHTML =
     `<b>${lv.name}</b><br>${lv.desc.replace(/\n/g,'<br>')}` +
-    (lv.cpuLink ? `<div class="cpuLink">🖥 <b>CPUとのつながり</b><br>${lv.cpuLink}</div>` : '');
+    (lv.cpuLink ? `<div class="cpuLink">🖥 <b>CPUとのつながり</b><br>${lv.cpuLink}</div>` : '') +
+    (lv.decompose ? `<div class="zoomBtn" id="decomposeBtn">🔬 もっと分解する：トランジスタの中身を見る</div>` : '');
+  if (lv.decompose){
+    document.getElementById('decomposeBtn').addEventListener('click', ()=>{
+      document.getElementById('transistorModal').style.display = 'flex';
+    });
+  }
   document.getElementById('truthTable').innerHTML = '';
   document.getElementById('status').textContent = '';
   resetCircuit();
@@ -688,6 +792,9 @@ if (!localStorage.getItem(INTRO_KEY)){
 document.getElementById('introCloseBtn').addEventListener('click', ()=>{
   document.getElementById('introModal').style.display = 'none';
   localStorage.setItem(INTRO_KEY, '1');
+});
+document.getElementById('transistorCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('transistorModal').style.display = 'none';
 });
 </script>
 </body>
