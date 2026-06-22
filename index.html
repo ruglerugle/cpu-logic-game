@@ -121,6 +121,38 @@
   #transistorModal table { border-collapse: collapse; margin: 10px 0; }
   #transistorModal th, #transistorModal td { border: 1px solid #3a3f54; padding: 5px 12px; text-align: center; }
   #transistorModal th { background: #20232f; }
+  #atomicModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 101;
+  }
+  #atomicModal .box {
+    background: var(--panel);
+    border: 1px solid #3a3f54;
+    border-radius: 10px;
+    padding: 24px 28px;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow-y: auto;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+  #atomicModal h2 { margin-top: 0; color: var(--accent); }
+  #atomicModal button.close {
+    margin-top: 16px;
+    padding: 8px 20px;
+    background: var(--accent);
+    color: #06201d;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  circle.carrier { transition: cx 0.4s ease; }
   .gateBtn {
     display: block;
     width: 100%;
@@ -306,7 +338,63 @@
       <b>2人の門番が同時に開くことは絶対にない</b>ので、電気が無駄に流れ続けず、CPUの電力消費を抑えられます。
       これを何十億個も小さく並べたものが、実際のCPUチップです。
     </p>
+    <div class="zoomBtn" id="atomicOpenBtn">🔬 さらに分解する：Aって何？門番はどうやって開閉してる？</div>
     <button class="close" id="transistorCloseBtn">閉じる</button>
+  </div>
+</div>
+
+<div id="atomicModal">
+  <div class="box">
+    <h2>🧲 Aの正体と、門番が動く仕組み</h2>
+    <p>
+      <b>Aとは何か？</b><br>
+      Aは「電気を流す細い線」です。A=1のときは、その線に<b>電圧（電気の圧力）</b>がかかっています。
+      A=0のときは、電圧がかかっていない（空っぽの状態）です。電圧があるかないか、それだけです。
+    </p>
+    <p>
+      <b>門番はどうやって開閉するのか？</b><br>
+      門番（トランジスタ）の中には、電気がふつうは流れない「砂の道」のような部分（チャンネル）があります。
+      その道の真上に、Aの線につながった小さな金属の板（ゲート）が置かれています。
+    </p>
+    <p>
+      この金属板は<b>磁石</b>のようなふるまいをします。Aに電圧がかかると、板が砂の道の中にある
+      小さな粒（電子）を<b>引き寄せ</b>ます。粒が引き寄せられて一列に並ぶと、そこが
+      電気の通り道（橋）になり、門番が「開いた」状態になります。電圧がなければ粒は散らばったままで、
+      道はつながらず「閉じた」状態です。
+    </p>
+    <div style="text-align:center; margin: 14px 0;">
+      <button id="toggleAtomicBtn" style="padding:10px 22px; font-size:15px; font-weight:bold; background:#ffd54f; color:#332600; border:none; border-radius:8px; cursor:pointer;">
+        Aを切り替える（現在: A = 0）
+      </button>
+    </div>
+    <svg id="atomicSvg" viewBox="0 0 360 150" style="width:100%; max-width:340px; display:block; margin:0 auto;">
+      <text x="180" y="16" text-anchor="middle" fill="#ffd54f" font-size="12">A（電圧の線）</text>
+      <line x1="180" y1="20" x2="180" y2="36" stroke="#ffd54f" stroke-width="2"/>
+      <rect id="atomicGatePlate" x="110" y="36" width="140" height="10" rx="2" fill="#666"/>
+      <text x="180" y="58" text-anchor="middle" fill="#888" font-size="10">↓ ここで引き寄せる力が働く ↓</text>
+      <rect x="90" y="70" width="180" height="40" rx="4" fill="#2a2a32" stroke="#555"/>
+      <text x="40" y="95" fill="#9fe8de" font-size="11">電源側</text>
+      <text x="290" y="95" fill="#9fe8de" font-size="11">地面側</text>
+      <circle class="carrier" cx="115" cy="90" r="6" fill="#aaa"/>
+      <circle class="carrier" cx="150" cy="90" r="6" fill="#aaa"/>
+      <circle class="carrier" cx="185" cy="90" r="6" fill="#aaa"/>
+      <circle class="carrier" cx="220" cy="90" r="6" fill="#aaa"/>
+      <circle class="carrier" cx="255" cy="90" r="6" fill="#aaa"/>
+      <text id="atomicState" x="180" y="135" text-anchor="middle" fill="#9c8" font-size="13" font-weight="bold">粒は散らばっている → 道は閉じている</text>
+    </svg>
+    <p id="atomicExplain" style="background:#1c2a28; border-left:3px solid var(--accent); padding:8px 10px; border-radius:4px; font-size:13px;">
+      A=0なので金属板に電圧がかかっておらず、引き寄せる力が働きません。粒（電子）はばらばらのままで、
+      電気の通り道はつながっていません。
+    </p>
+    <p style="font-size:13px; color:#999;">
+      ※ ここではNMOS（A=1で開く門番）の動きを例にしています。PMOS（A=0で開く門番）はこの逆で、
+      もともと道がつながっている状態から、Aに電圧がかかると粒が反対に散らばって道が切れる、という動きです。
+      「磁石が粒を引き寄せたり散らしたりして道を作る/壊す」という考え方自体は同じです。
+    </p>
+    <p style="font-size:13px; color:#999;">
+      これ以上分解すると、量子力学という物理学の世界に入ります。CPUを使う・作る上ではここまでの理解で十分です。
+    </p>
+    <button class="close" id="atomicCloseBtn">閉じる</button>
   </div>
 </div>
 
@@ -804,7 +892,33 @@ document.getElementById('transistorCloseBtn').addEventListener('click', ()=>{
   document.getElementById('transistorModal').style.display = 'none';
 });
 
+document.getElementById('atomicOpenBtn').addEventListener('click', ()=>{
+  document.getElementById('atomicModal').style.display = 'flex';
+});
+document.getElementById('atomicCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('atomicModal').style.display = 'none';
+});
+
 let transistorA = 0;
+function updateAtomicVisual(){
+  document.getElementById('toggleAtomicBtn').textContent = `Aを切り替える（現在: A = ${transistorA}）`;
+  const open = transistorA === 1;
+  const carriers = document.querySelectorAll('#atomicSvg .carrier');
+  const alignedX = [140, 160, 180, 200, 220];
+  const scatteredX = [115, 150, 185, 220, 255];
+  carriers.forEach((c,i)=>{
+    c.setAttribute('cx', open ? alignedX[i] : scatteredX[i]);
+    c.setAttribute('fill', open ? '#4fd1c5' : '#aaa');
+  });
+  document.getElementById('atomicGatePlate').setAttribute('fill', open ? '#ffd54f' : '#666');
+  document.getElementById('atomicState').textContent = open
+    ? '粒が引き寄せられて並んだ → 道がつながった（開いた）'
+    : '粒は散らばっている → 道は閉じている';
+  document.getElementById('atomicExplain').innerHTML = open
+    ? 'A=1で金属板に電圧がかかり、磁石のように粒（電子）を引き寄せました。粒が一列に並んで橋ができたので、電源側から地面側まで電気が通れるようになりました。'
+    : 'A=0なので金属板に電圧がかかっておらず、引き寄せる力が働きません。粒（電子）はばらばらのままで、電気の通り道はつながっていません。';
+}
+
 function updateTransistorVisual(){
   const out = transistorA ? 0 : 1;
   document.getElementById('toggleABtn').textContent = `Aを切り替える（現在: A = ${transistorA}）`;
@@ -830,11 +944,15 @@ function updateTransistorVisual(){
     explain.innerHTML = `A = 1（ON）なので、今度は<b>下の門番が開いて</b>OUTから地面まで電気が流れ出てしまい、OUTのランプは<b>消灯（0）</b>します。上の門番は閉まっているので電源側からは流れません。`;
   }
 }
-document.getElementById('toggleABtn').addEventListener('click', ()=>{
+function toggleTransistorA(){
   transistorA = transistorA ? 0 : 1;
   updateTransistorVisual();
-});
+  updateAtomicVisual();
+}
+document.getElementById('toggleABtn').addEventListener('click', toggleTransistorA);
+document.getElementById('toggleAtomicBtn').addEventListener('click', toggleTransistorA);
 updateTransistorVisual();
+updateAtomicVisual();
 </script>
 </body>
 </html>
