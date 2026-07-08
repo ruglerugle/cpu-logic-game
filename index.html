@@ -64,11 +64,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 .side-toggle{width:36px;height:32px;border:1px solid rgba(255,255,255,.28);border-radius:7px;background:rgba(255,255,255,.10);color:#fff;font-weight:950;font-size:18px;cursor:pointer;line-height:1;flex-shrink:0}
 .side-backdrop{display:none}
 
-/* Gate panel in sidebar */
-.side-gate-section{padding:10px;border-bottom:1px solid var(--side-line)}
-.side-section-label{font-size:11px;font-weight:900;color:#82d4ff;margin-bottom:6px;letter-spacing:.06em}
-.gateBtn{display:block;width:100%;margin:4px 0;padding:8px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:6px;color:#e0f0ff;cursor:pointer;font-size:13px;font-weight:900;text-align:left;touch-action:manipulation}
-.gateBtn:hover{background:rgba(255,255,255,.16)}
+/* Gate bar (always visible above canvas) */
+#gate-bar{display:flex;align-items:center;gap:6px;padding:7px 14px;background:#f0f5fb;border-bottom:1px solid #c9d2da;flex-shrink:0;flex-wrap:wrap}
+.gate-bar-label{font-size:12px;font-weight:900;color:#5a7a99;white-space:nowrap}
+.gateBtn{padding:7px 13px;background:#fff;border:1.5px solid #7a8da3;border-radius:6px;color:#162232;cursor:pointer;font-size:13px;font-weight:900;touch-action:manipulation;white-space:nowrap}
+.gateBtn:hover{background:#dce8f5;border-color:#378add}
 
 /* Level list in sidebar */
 .step-list{display:flex;flex-direction:column}
@@ -229,13 +229,6 @@ circle.carrier{transition:cx 0.4s ease}
         <button class="side-toggle" onclick="toggleSidebar()" title="ナビを開閉">☰</button>
         <span class="side-head-text">レベルとゲート</span>
       </div>
-      <div class="side-gate-section">
-        <div class="side-section-label">ゲートを配置</div>
-        <button class="gateBtn" data-gate="NOT">NOT　反転</button>
-        <button class="gateBtn" data-gate="AND">AND　両方1→1</button>
-        <button class="gateBtn" data-gate="OR">OR　どちらか→1</button>
-        <button class="gateBtn" data-gate="XOR">XOR　違うとき→1</button>
-      </div>
       <div class="step-list" id="levelList"></div>
     </aside>
 
@@ -257,6 +250,13 @@ circle.carrier{transition:cx 0.4s ease}
 
       <!-- 回路ゲーム画面 -->
       <div id="game-screen" style="display:none">
+        <div id="gate-bar">
+          <span class="gate-bar-label">ゲートを配置：</span>
+          <button class="gateBtn" data-gate="NOT">NOT</button>
+          <button class="gateBtn" data-gate="AND">AND</button>
+          <button class="gateBtn" data-gate="OR">OR</button>
+          <button class="gateBtn" data-gate="XOR">XOR</button>
+        </div>
         <div id="toolbar">
           <button id="backToIntroBtn" onclick="showIntro()">← 説明へ</button>
           <button id="runBtn" class="btn btn-p">▶ 検証する</button>
