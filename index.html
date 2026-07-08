@@ -153,8 +153,10 @@ text.label{fill:#162232;font-size:12px;font-weight:750;pointer-events:none;user-
 #msg{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:8px;font-weight:950;font-size:15px;display:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 
 /* Back to intro link */
-#backToIntroBtn{background:none;border:none;color:#1678c8;font-size:13px;font-weight:900;cursor:pointer;padding:4px 8px;display:flex;align-items:center;gap:4px}
+#backToIntroBtn{background:none;border:none;color:#1678c8;font-size:13px;font-weight:900;cursor:pointer;padding:4px 8px;display:flex;align-items:center;gap:4px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #backToIntroBtn:hover{text-decoration:underline}
+/* ボタン全体に遅延ゼロを保証（iOS 300ms delay 対策） */
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
 /* ── Modals ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:100}
@@ -821,10 +823,10 @@ document.querySelectorAll('.gateBtn').forEach(btn=>{
 });
 
 // クリア
-document.getElementById('clearBtn').addEventListener('click',()=>resetCircuit());
+document.getElementById('clearBtn').addEventListener('pointerup',(e)=>{e.stopPropagation();resetCircuit();});
 
 // ====================== 検証 ======================
-document.getElementById('runBtn').addEventListener('click',()=>{
+document.getElementById('runBtn').addEventListener('pointerup',(e)=>{e.stopPropagation();
   const lv=LEVELS[currentLevelIdx];
   const n=lv.inputs.length;
   let allPass=true;
@@ -879,7 +881,7 @@ function showMsg(pass){
   setTimeout(()=>{el.style.display='none';},3000);
 }
 
-document.getElementById('truthTableClose').addEventListener('click',()=>{
+document.getElementById('truthTableClose').addEventListener('pointerup',(e)=>{e.stopPropagation();
   document.getElementById('truthTableWrap').classList.remove('visible');
 });
 
