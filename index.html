@@ -233,7 +233,8 @@
   #toolbar button.primary { background: var(--accent); color: #06201d; border: none; font-weight: bold; }
   #status { margin-left: auto; font-size: 14px; }
   #canvasWrap { flex: 1; position: relative; overflow: hidden; background: radial-gradient(circle at 1px 1px, #20232f 1px, transparent 0) 0 0/20px 20px; }
-  svg { width: 100%; height: 100%; cursor: default; }
+  svg { width: 100%; height: 100%; cursor: default; touch-action: none; }
+  #canvasWrap { touch-action: none; }
   .node {
     cursor: grab;
   }
@@ -834,10 +835,16 @@ function pinFromPoint(clientX, clientY){
   return getPin(Number(el.dataset.pinid));
 }
 
+let rafPending = false;
+function scheduleRender(){
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(()=>{ rafPending = false; render(); });
+}
 function onMove(clientX, clientY){
   const {x,y} = svgXY(clientX, clientY);
-  if (dragNode){ dragNode.x = x - dragOffset.x; dragNode.y = y - dragOffset.y; render(); }
-  else if (wireStart){ tempWireEnd = {x,y}; render(); }
+  if (dragNode){ dragNode.x = x - dragOffset.x; dragNode.y = y - dragOffset.y; scheduleRender(); }
+  else if (wireStart){ tempWireEnd = {x,y}; scheduleRender(); }
 }
 function onUp(clientX, clientY){
   if (dragNode){ dragNode = null; return; }
