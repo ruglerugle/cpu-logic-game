@@ -40,26 +40,19 @@
       border-bottom: 1px solid #2a2e3d;
       padding: 10px 12px;
       overflow-y: visible;
+      flex-shrink: 0;
     }
     #sidebar h1 { font-size: 15px; margin-bottom: 4px; }
-    #levelInfo { font-size: 12px; }
-    .cpuLink { font-size: 11.5px; }
-    #sidebarToggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
-    }
+    #sidebarToggleBtn { display: inline-block !important; }
     #sidebarBody { display: none; }
     #sidebarBody.open { display: block; }
-    .gateBtn { padding: 6px 8px; font-size: 13px; }
-    #toolbar button { padding: 5px 10px; font-size: 13px; }
+    #levelInfo { font-size: 12px; }
+    .cpuLink { font-size: 11.5px; }
+    .gateBtn { padding: 8px; font-size: 13px; margin: 4px 0; }
+    #toolbar { padding: 8px; gap: 6px; flex-wrap: wrap; }
+    #toolbar button { padding: 8px 12px; font-size: 13px; }
     #canvasWrap { flex: 1; min-height: 0; }
-    .pin { r: 9px; } /* bigger touch targets */
-  }
-  @media (min-width: 601px) {
-    #sidebarToggle .arrow { display: none; }
+    #truthTableWrap { max-height: 35vh; overflow-y: auto; }
   }
   #sidebar h1 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
   #levelInfo { font-size: 13px; line-height: 1.5; margin-bottom: 12px; }
@@ -249,20 +242,34 @@
   }
   .pin:hover { stroke: var(--accent); stroke-width: 3; }
   text.label { fill: var(--text); font-size: 12px; pointer-events: none; user-select: none; }
-  #truthTable {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(26,29,41,0.95);
-    border: 1px solid #2a2e3d;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 12px;
-    max-height: 60vh;
-    overflow-y: auto;
+  #truthTableWrap {
+    background: var(--panel);
+    border-top: 1px solid #2a2e3d;
+    padding: 8px 16px;
+    display: none;
+    flex-shrink: 0;
   }
-  #truthTable table { border-collapse: collapse; }
-  #truthTable th, #truthTable td { padding: 3px 8px; text-align: center; border-bottom: 1px solid #2a2e3d; }
+  #truthTableWrap.visible { display: block; }
+  #truthTableHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: bold;
+  }
+  #truthTableClose {
+    background: #3a3f54;
+    border: none;
+    color: var(--text);
+    border-radius: 4px;
+    padding: 2px 10px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #truthTable { overflow-x: auto; }
+  #truthTable table { border-collapse: collapse; white-space: nowrap; }
+  #truthTable th, #truthTable td { padding: 3px 10px; text-align: center; border-bottom: 1px solid #2a2e3d; font-size: 13px; }
   #truthTable tr.pass td { color: #6f6; }
   #truthTable tr.fail td { color: #f66; }
   #msg {
@@ -282,9 +289,9 @@
 <body>
 
 <div id="sidebar">
-  <div id="sidebarToggle" onclick="toggleSidebar()">
+  <div style="display:flex; align-items:center; justify-content:space-between;">
     <h1 style="margin:0;">⚙ 論理回路でCPUを学ぶ</h1>
-    <span class="arrow" id="sidebarArrow" style="font-size:18px; color:var(--accent);">▼</span>
+    <button id="sidebarToggleBtn" onclick="toggleSidebar()" style="display:none; padding:6px 12px; background:#252a3a; border:1px solid #3a3f54; border-radius:6px; color:var(--accent); cursor:pointer; font-size:13px;">メニュー ▼</button>
   </div>
   <div id="sidebarBody">
     <div id="levelInfo"></div>
@@ -438,12 +445,17 @@
   <div id="toolbar">
     <button id="runBtn" class="primary">▶ 検証する</button>
     <button id="clearBtn">クリア</button>
-    <button id="deleteHint">配線/ゲートをクリックで削除</button>
     <div id="status"></div>
+  </div>
+  <div id="truthTableWrap">
+    <div id="truthTableHeader">
+      <span id="truthTableTitle">真理値表</span>
+      <button id="truthTableClose">✕ 閉じる</button>
+    </div>
+    <div id="truthTable"></div>
   </div>
   <div id="canvasWrap">
     <svg id="svg"></svg>
-    <div id="truthTable"></div>
     <div id="msg"></div>
   </div>
 </div>
@@ -743,23 +755,25 @@ function render(){
       const hitArea = document.createElementNS("http://www.w3.org/2000/svg","circle");
       hitArea.setAttribute('cx', pos.x);
       hitArea.setAttribute('cy', pos.y);
-      hitArea.setAttribute('r', 18);
+      hitArea.setAttribute('r', 20);
       hitArea.setAttribute('fill', 'transparent');
       hitArea.dataset.pinid = pin.id;
+      const pinHandler = (e)=>{ e.stopPropagation(); e.preventDefault(); onPinTap(pin); };
+      hitArea.addEventListener('mousedown', pinHandler);
+      hitArea.addEventListener('touchstart', pinHandler, {passive:false});
       svg.appendChild(hitArea);
       // 見た目の円
       const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
       c.setAttribute('cx', pos.x);
       c.setAttribute('cy', pos.y);
-      c.setAttribute('r', 9);
+      c.setAttribute('r', 10);
       c.setAttribute('class','pin');
       c.dataset.pinid = pin.id;
       c.setAttribute('fill', isSelected ? '#ffd54f' : (pin.value ? 'var(--wire-on)' : '#444'));
       c.setAttribute('stroke', isSelected ? '#ffd54f' : '#888');
-      c.setAttribute('stroke-width', isSelected ? '3' : '1.5');
-      c.addEventListener('mousedown', (e)=>{ e.stopPropagation(); onPinTap(pin); });
-      c.addEventListener('mouseup', (e)=>{ e.stopPropagation(); });
-      hitArea.addEventListener('mousedown', (e)=>{ e.stopPropagation(); onPinTap(pin); });
+      c.setAttribute('stroke-width', isSelected ? '3' : '2');
+      c.addEventListener('mousedown', pinHandler);
+      c.addEventListener('touchstart', pinHandler, {passive:false});
       svg.appendChild(c);
     });
   });
@@ -900,6 +914,7 @@ function loadLevel(){
     });
   }
   document.getElementById('truthTable').innerHTML = '';
+  document.getElementById('truthTableWrap').classList.remove('visible');
   document.getElementById('status').textContent = '';
   resetCircuit();
   buildLevelList();
@@ -933,9 +948,12 @@ document.getElementById('runBtn').addEventListener('click', ()=>{
 
 function renderTruthTable(lv, rows){
   const el = document.getElementById('truthTable');
+  const wrap = document.getElementById('truthTableWrap');
+  const allPass = rows.every(r=>r.pass);
+  document.getElementById('truthTableTitle').textContent = allPass ? '✓ 真理値表（全パターン一致）' : '✗ 真理値表（不一致あり）';
   let html = '<table><tr>';
   lv.inputs.forEach(n=> html += `<th>${n}</th>`);
-  lv.outputs.forEach(n=> html += `<th>${n}</th>`);
+  lv.outputs.forEach(n=> html += `<th>結果</th>`);
   lv.outputs.forEach(n=> html += `<th>期待</th>`);
   html += '</tr>';
   rows.forEach(r=>{
@@ -947,6 +965,7 @@ function renderTruthTable(lv, rows){
   });
   html += '</table>';
   el.innerHTML = html;
+  wrap.classList.add('visible');
 }
 
 function showMsg(pass){
@@ -960,15 +979,15 @@ function showMsg(pass){
 }
 
 function toggleSidebar(){
-  if (window.innerWidth > 600) return;
   const body = document.getElementById('sidebarBody');
-  const arrow = document.getElementById('sidebarArrow');
+  const btn = document.getElementById('sidebarToggleBtn');
   body.classList.toggle('open');
-  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+  btn.textContent = body.classList.contains('open') ? 'メニュー ▲' : 'メニュー ▼';
 }
-// 常に開いた状態で起動（モバイルでも操作できるよう）
 document.getElementById('sidebarBody').classList.add('open');
-document.getElementById('sidebarArrow').textContent = '▲';
+document.getElementById('truthTableClose').addEventListener('click', ()=>{
+  document.getElementById('truthTableWrap').classList.remove('visible');
+});
 
 // ====================== 起動 ======================
 loadLevel();
