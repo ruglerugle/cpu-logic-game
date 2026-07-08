@@ -160,6 +160,8 @@ svg{width:100%;height:100%;cursor:default;touch-action:none}
 text.label{fill:#162232;font-size:12px;font-weight:750;pointer-events:none;user-select:none}
 #msg{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:8px;font-weight:950;font-size:15px;display:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 
+.btn-next{background:linear-gradient(#f5a623,#d4870a);border-color:#b87210;color:#fff;box-shadow:0 3px 0 #8a5508}
+.btn-next:hover{opacity:.9;background:linear-gradient(#f5a623,#d4870a)}
 /* Back to intro link */
 #backToIntroBtn{background:none;border:none;color:#1678c8;font-size:13px;font-weight:900;cursor:pointer;padding:4px 8px;display:flex;align-items:center;gap:4px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #backToIntroBtn:hover{text-decoration:underline}
@@ -271,7 +273,9 @@ circle.carrier{transition:cx 0.4s ease}
           <button id="backToIntroBtn" onclick="showIntro()">← 説明へ</button>
           <button id="runBtn" class="btn btn-p">▶ 検証する</button>
           <button id="clearBtn" class="btn">クリア</button>
+          <button id="answerBtn" class="btn">解答</button>
           <div id="status"></div>
+          <button id="nextLevelBtn" class="btn btn-next" style="display:none" onclick="goNextLevel()">次のレベルへ →</button>
         </div>
         <div id="truthTableWrap">
           <div id="truthTableHeader">
@@ -831,7 +835,88 @@ document.querySelectorAll('.gateBtn').forEach(btn=>{
 });
 
 // クリア
-document.getElementById('clearBtn').addEventListener('pointerup',(e)=>{e.stopPropagation();resetCircuit();});
+document.getElementById('clearBtn').addEventListener('pointerup',(e)=>{e.stopPropagation();resetCircuit();hideNextBtn();});
+
+// ====================== 解答 ======================
+// 各レベルの正解回路を自動配置する関数テーブル
+const SOLUTIONS = [
+  // 0: NOT: A→NOT→OUT
+  (inp,out,cx)=>{
+    const g=addNode('NOT',cx-36,80);
+    wire(inp[0],g); wire(g,out[0]);
+  },
+  // 1: AND: A,B→AND→OUT
+  (inp,out,cx)=>{
+    const g=addNode('AND',cx-36,100);
+    wire(inp[0],g,0); wire(inp[1],g,1); wire(g,out[0]);
+  },
+  // 2: OR: A,B→OR→OUT
+  (inp,out,cx)=>{
+    const g=addNode('OR',cx-36,100);
+    wire(inp[0],g,0); wire(inp[1],g,1); wire(g,out[0]);
+  },
+  // 3: XOR: A,B→XOR→OUT
+  (inp,out,cx)=>{
+    const g=addNode('XOR',cx-36,100);
+    wire(inp[0],g,0); wire(inp[1],g,1); wire(g,out[0]);
+  },
+  // 4: Half Adder: XOR→SUM, AND→CARRY (A,Bを両方に接続)
+  (inp,out,cx)=>{
+    const xr=addNode('XOR',cx-36,60);
+    const an=addNode('AND',cx-36,170);
+    wire(inp[0],xr,0); wire(inp[1],xr,1);
+    wire(inp[0],an,0); wire(inp[1],an,1);
+    wire(xr,out[0]); wire(an,out[1]);
+  },
+  // 5: Full Adder: XOR1(A,B)→XOR2(,Cin)→SUM; AND1(A,B), AND2(XOR1,Cin)→OR→Cout
+  (inp,out,cx)=>{
+    const xr1=addNode('XOR',cx-130,60);
+    const xr2=addNode('XOR',cx+10,60);
+    const an1=addNode('AND',cx-130,190);
+    const an2=addNode('AND',cx+10,190);
+    const or=addNode('OR',cx+150,125);
+    wire(inp[0],xr1,0); wire(inp[1],xr1,1);
+    wire(xr1,xr2,0);   wire(inp[2],xr2,1);
+    wire(xr2,out[0]);
+    wire(inp[0],an1,0); wire(inp[1],an1,1);
+    wire(xr1,an2,0);    wire(inp[2],an2,1);
+    wire(an1,or,0); wire(an2,or,1);
+    wire(or,out[1]);
+  },
+  // 6: ALU: AND(A,B)→AND(,NOT(SEL))→OR→OUT; OR(A,B)→AND(,SEL)→OR
+  (inp,out,cx)=>{
+    const an1=addNode('AND',cx-140,50);
+    const or1=addNode('OR', cx-140,160);
+    const nt =addNode('NOT',cx-20, 270);
+    const an2=addNode('AND',cx+60, 50);
+    const an3=addNode('AND',cx+60, 160);
+    const or2=addNode('OR', cx+190,105);
+    wire(inp[0],an1,0); wire(inp[1],an1,1);
+    wire(inp[0],or1,0); wire(inp[1],or1,1);
+    wire(inp[2],nt,0);
+    wire(an1,an2,0); wire(nt,an2,1);
+    wire(or1,an3,0); wire(inp[2],an3,1);
+    wire(an2,or2,0); wire(an3,or2,1);
+    wire(or2,out[0]);
+  },
+];
+
+// ノードのoutPins[0]→別ノードのinPins[toIdx] をつなぐ
+function wire(fromNode, toNode, toIdx=0){
+  wires.push({id:uid(), fromPin:fromNode.outPins[0], toPin:toNode.inPins[toIdx]});
+}
+
+function showSolution(){
+  resetCircuit();
+  hideNextBtn();
+  const cx=(svg.clientWidth||800)/2;
+  const inp=nodes.filter(n=>n.type==='INPUT');
+  const out=nodes.filter(n=>n.type==='OUTPUT');
+  SOLUTIONS[currentLevelIdx](inp,out,cx);
+  render();
+  document.getElementById('status').textContent='（解答例を表示中）';
+}
+document.getElementById('answerBtn').addEventListener('pointerup',(e)=>{e.stopPropagation();showSolution();});
 
 // ====================== 検証 ======================
 document.getElementById('runBtn').addEventListener('pointerup',(e)=>{e.stopPropagation();
@@ -887,6 +972,23 @@ function showMsg(pass){
   el.textContent=pass?'✓ 正解！すべての入力パターンで一致しました。':'✗ 不一致あり。表を確認して回路を修正してください。';
   document.getElementById('status').textContent=pass?'✓ クリア！':'未クリア';
   setTimeout(()=>{el.style.display='none';},3000);
+  if(pass) showNextBtn();
+}
+
+function showNextBtn(){
+  const btn=document.getElementById('nextLevelBtn');
+  const isLast=currentLevelIdx>=LEVELS.length-1;
+  btn.textContent=isLast?'🎉 全レベルクリア！':'次のレベルへ →';
+  btn.style.display='inline-flex';
+  btn.onclick=isLast?()=>alert('おめでとう！全7レベルクリアしました🎉'):goNextLevel;
+}
+function hideNextBtn(){
+  document.getElementById('nextLevelBtn').style.display='none';
+}
+function goNextLevel(){
+  if(currentLevelIdx<LEVELS.length-1){
+    loadLevel(currentLevelIdx+1);
+  }
 }
 
 document.getElementById('truthTableClose').addEventListener('pointerup',(e)=>{e.stopPropagation();
