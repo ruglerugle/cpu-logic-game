@@ -871,6 +871,7 @@ svg.addEventListener('pointermove', (e)=>{
 });
 
 svg.addEventListener('pointerup', (e)=>{
+  svg.releasePointerCapture(e.pointerId);
   if (dragNode){ dragNode = null; render(); return; }
   if (wireStart){
     let el = document.elementFromPoint(e.clientX, e.clientY);
