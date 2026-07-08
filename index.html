@@ -698,6 +698,7 @@ function render(){
     const g = document.createElementNS("http://www.w3.org/2000/svg","g");
     g.setAttribute('class','node');
     g.setAttribute('transform', `translate(${node.x},${node.y})`);
+    g.dataset.nodeid = node.id;
 
     const rect = document.createElementNS("http://www.w3.org/2000/svg","rect");
     rect.setAttribute('width', w);
@@ -861,15 +862,19 @@ svg.addEventListener('click', (e)=>{
 svg.addEventListener('touchstart', (e)=>{
   e.preventDefault();
   const t = e.touches[0];
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  if (el && el.dataset.pinid){
-    // ピンをタップ
-    onPinTap(getPin(Number(el.dataset.pinid)));
-  } else if (el && el.dataset.nodeid){
-    // ノード本体をタップ → ドラッグ開始
-    startNodeDrag(getNode(Number(el.dataset.nodeid)), t.clientX, t.clientY);
+  let el = document.elementFromPoint(t.clientX, t.clientY);
+  // ピン判定（data-pinid）
+  let pinEl = el;
+  while (pinEl && pinEl !== svg && !pinEl.dataset.pinid) pinEl = pinEl.parentElement;
+  // ノード判定（data-nodeid、ピンより優先度低）
+  let nodeEl = el;
+  while (nodeEl && nodeEl !== svg && !nodeEl.dataset.nodeid) nodeEl = nodeEl.parentElement;
+
+  if (pinEl && pinEl.dataset.pinid){
+    onPinTap(getPin(Number(pinEl.dataset.pinid)));
+  } else if (nodeEl && nodeEl.dataset.nodeid){
+    startNodeDrag(getNode(Number(nodeEl.dataset.nodeid)), t.clientX, t.clientY);
   } else {
-    // 背景タップ → 配線選択キャンセル
     wireStart = null; tempWireEnd = null; render();
   }
 }, {passive:false});
