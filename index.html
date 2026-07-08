@@ -737,19 +737,28 @@ function render(){
     // pins
     [...node.inPins.map(id=>getPin(id)), ...node.outPins.map(id=>getPin(id))].forEach(pin=>{
       const pos = pinPos(pin);
+      const isSelected = wireStart === pin.id;
+      // 見えない大きなタッチターゲット（透明の大きな円）
+      const hitArea = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      hitArea.setAttribute('cx', pos.x);
+      hitArea.setAttribute('cy', pos.y);
+      hitArea.setAttribute('r', 18);
+      hitArea.setAttribute('fill', 'transparent');
+      hitArea.dataset.pinid = pin.id;
+      svg.appendChild(hitArea);
+      // 見た目の円
       const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
       c.setAttribute('cx', pos.x);
       c.setAttribute('cy', pos.y);
-      c.setAttribute('r', 6);
+      c.setAttribute('r', 9);
       c.setAttribute('class','pin');
-      const connected = pin.kind==='in' ? wires.some(w=>w.toPin===pin.id) : true;
-      c.setAttribute('fill', pin.value ? 'var(--wire-on)' : '#444');
-      c.setAttribute('stroke', '#888');
-      c.setAttribute('stroke-width', '1.5');
-      c.addEventListener('mousedown', (e)=>{ e.stopPropagation(); startPinDrag(pin); });
-      c.addEventListener('touchstart', (e)=>{ e.preventDefault(); e.stopPropagation(); startPinDrag(pin); }, {passive:false});
-      c.addEventListener('mouseup', (e)=>{ e.stopPropagation(); endPinDrag(pin.id); });
-      c.addEventListener('touchend', (e)=>{ e.preventDefault(); e.stopPropagation(); endPinDrag(pin.id); }, {passive:false});
+      c.dataset.pinid = pin.id;
+      c.setAttribute('fill', isSelected ? '#ffd54f' : (pin.value ? 'var(--wire-on)' : '#444'));
+      c.setAttribute('stroke', isSelected ? '#ffd54f' : '#888');
+      c.setAttribute('stroke-width', isSelected ? '3' : '1.5');
+      c.addEventListener('mousedown', (e)=>{ e.stopPropagation(); onPinTap(pin); });
+      c.addEventListener('mouseup', (e)=>{ e.stopPropagation(); });
+      hitArea.addEventListener('mousedown', (e)=>{ e.stopPropagation(); onPinTap(pin); });
       svg.appendChild(c);
     });
   });
@@ -784,32 +793,68 @@ function startNodeDrag(node, clientX, clientY){
   dragOffset.x = x - node.x;
   dragOffset.y = y - node.y;
 }
-function startPinDrag(pin){
-  if (pin.kind === 'out'){
-    wireStart = pin.id;
+// ピンをタップ/クリックしたとき（デスクトップ・モバイル共通の2タップ接続）
+function onPinTap(pin){
+  if (!wireStart){
+    // 1タップ目：出力ピンまたは接続済み入力ピンを選択
+    if (pin.kind === 'out'){
+      wireStart = pin.id;
+    } else {
+      const existing = wires.find(w=>w.toPin===pin.id);
+      if (existing){ wires = wires.filter(w=>w.id!==existing.id); wireStart = existing.fromPin; }
+    }
   } else {
-    const existing = wires.find(w=>w.toPin===pin.id);
-    if (existing){ wires = wires.filter(w=>w.id!==existing.id); wireStart = existing.fromPin; }
+    // 2タップ目：接続先を確定
+    if (wireStart === pin.id){ wireStart = null; } // 同じピンをもう一度タップでキャンセル
+    else { tryConnect(wireStart, pin.id); wireStart = null; }
+    tempWireEnd = null;
   }
+  render();
 }
-function endPinDrag(pinId){
-  if (wireStart){ tryConnect(wireStart, pinId); wireStart = null; tempWireEnd = null; render(); }
+
+// タッチ終了時に指の下にあるピンを elementFromPoint で探す
+function pinFromPoint(clientX, clientY){
+  const el = document.elementFromPoint(clientX, clientY);
+  if (!el || !el.dataset.pinid) return null;
+  return getPin(Number(el.dataset.pinid));
 }
+
 function onMove(clientX, clientY){
   const {x,y} = svgXY(clientX, clientY);
   if (dragNode){ dragNode.x = x - dragOffset.x; dragNode.y = y - dragOffset.y; render(); }
   else if (wireStart){ tempWireEnd = {x,y}; render(); }
 }
-function onUp(){
-  dragNode = null;
-  if (wireStart){ wireStart = null; tempWireEnd = null; render(); }
+function onUp(clientX, clientY){
+  if (dragNode){ dragNode = null; return; }
+  // タッチ終了：指の下にピンがあれば接続
+  if (wireStart && clientX !== undefined){
+    const pin = pinFromPoint(clientX, clientY);
+    if (pin){ tryConnect(wireStart, pin.id); wireStart = null; tempWireEnd = null; render(); }
+  }
 }
 
 svg.addEventListener('mousemove', (e)=> onMove(e.clientX, e.clientY));
-svg.addEventListener('mouseup', onUp);
+svg.addEventListener('mouseup', (e)=>{ dragNode = null; });
 svg.addEventListener('mouseleave', ()=>{ dragNode = null; });
-svg.addEventListener('touchmove', (e)=>{ e.preventDefault(); onMove(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-svg.addEventListener('touchend', (e)=>{ e.preventDefault(); onUp(); }, {passive:false});
+svg.addEventListener('click', (e)=>{
+  // キャンバス背景クリックで選択キャンセル
+  if (e.target === svg){ wireStart = null; tempWireEnd = null; render(); }
+});
+svg.addEventListener('touchmove', (e)=>{
+  e.preventDefault();
+  onMove(e.touches[0].clientX, e.touches[0].clientY);
+}, {passive:false});
+svg.addEventListener('touchend', (e)=>{
+  e.preventDefault();
+  const t = e.changedTouches[0];
+  if (dragNode){ dragNode = null; return; }
+  if (wireStart){
+    const pin = pinFromPoint(t.clientX, t.clientY);
+    if (pin){ tryConnect(wireStart, pin.id); wireStart = null; tempWireEnd = null; }
+    // 移動量が少なければタップ扱い（ピンに触れていない場合はキャンセルしない）
+    render();
+  }
+}, {passive:false});
 
 // ====================== ゲートパレット ======================
 document.querySelectorAll('.gateBtn').forEach(btn=>{
@@ -920,12 +965,9 @@ function toggleSidebar(){
   body.classList.toggle('open');
   arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
 }
-// モバイルでは初期状態を閉じる
-if (window.innerWidth <= 600){
-  document.getElementById('sidebarBody').classList.remove('open');
-} else {
-  document.getElementById('sidebarBody').classList.add('open');
-}
+// 常に開いた状態で起動（モバイルでも操作できるよう）
+document.getElementById('sidebarBody').classList.add('open');
+document.getElementById('sidebarArrow').textContent = '▲';
 
 // ====================== 起動 ======================
 loadLevel();
