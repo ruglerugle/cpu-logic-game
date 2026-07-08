@@ -43,11 +43,15 @@
     }
     #sidebar h1 { font-size: 15px; margin: 0; }
     #sidebarToggleBtn { display: inline-block !important; }
+    #gatePanel { margin-bottom: 4px; }
+    #gatePanel .gateBtn { display: inline-block; width: auto; margin: 2px; padding: 7px 10px; font-size: 12px; }
     #sidebarBody {
       display: none;
-      max-height: 38vh;
+      max-height: 32vh;
       overflow-y: auto;
+      border-top: 1px solid #2a2e3d;
       padding-top: 8px;
+      margin-top: 6px;
     }
     #sidebarBody.open { display: block; }
     #levelInfo { font-size: 12px; }
@@ -294,19 +298,21 @@
 <body>
 
 <div id="sidebar">
-  <div style="display:flex; align-items:center; justify-content:space-between;">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
     <h1 style="margin:0;">⚙ 論理回路でCPUを学ぶ</h1>
-    <button id="sidebarToggleBtn" onclick="toggleSidebar()" style="display:none; padding:6px 12px; background:#252a3a; border:1px solid #3a3f54; border-radius:6px; color:var(--accent); cursor:pointer; font-size:13px;">メニュー ▼</button>
+    <button id="sidebarToggleBtn" onclick="toggleSidebar()" style="display:none; padding:6px 12px; background:#252a3a; border:1px solid #3a3f54; border-radius:6px; color:var(--accent); cursor:pointer; font-size:13px;">レベル ▼</button>
   </div>
+  <!-- ゲートボタンは常に表示 -->
+  <div id="gatePanel">
+    <div style="font-size:13px; color:#999; margin-bottom:4px;">ゲートを配置</div>
+    <button class="gateBtn" data-gate="NOT">NOT（1入力・反転）</button>
+    <button class="gateBtn" data-gate="AND">AND（両方1のとき1）</button>
+    <button class="gateBtn" data-gate="OR">OR（どちらか1で1）</button>
+    <button class="gateBtn" data-gate="XOR">XOR（一致しなければ1）</button>
+  </div>
+  <!-- レベル情報は折りたたみ可能 -->
   <div id="sidebarBody">
     <div id="levelInfo"></div>
-    <div>
-      <div style="font-size:13px; color:#999; margin-bottom:4px;">ゲートを配置</div>
-      <button class="gateBtn" data-gate="NOT">NOT（1入力・反転）</button>
-      <button class="gateBtn" data-gate="AND">AND（両方1のとき1）</button>
-      <button class="gateBtn" data-gate="OR">OR（どちらか1で1）</button>
-      <button class="gateBtn" data-gate="XOR">XOR（一致しなければ1）</button>
-    </div>
     <div id="levelList"></div>
   </div>
 </div>
@@ -1002,7 +1008,7 @@ function toggleSidebar(){
   const body = document.getElementById('sidebarBody');
   const btn = document.getElementById('sidebarToggleBtn');
   body.classList.toggle('open');
-  btn.textContent = body.classList.contains('open') ? 'メニュー ▲' : 'メニュー ▼';
+  btn.textContent = body.classList.contains('open') ? 'レベル ▲' : 'レベル ▼';
 }
 document.getElementById('sidebarBody').classList.add('open');
 document.getElementById('truthTableClose').addEventListener('click', ()=>{
