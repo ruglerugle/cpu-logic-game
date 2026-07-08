@@ -33,26 +33,30 @@
   }
   /* モバイルレイアウト */
   @media (max-width: 600px) {
-    body { flex-direction: column; }
+    body { flex-direction: column; height: 100dvh; }
     #sidebar {
       width: 100%;
       border-right: none;
       border-bottom: 1px solid #2a2e3d;
-      padding: 10px 12px;
-      overflow-y: visible;
+      padding: 8px 12px;
       flex-shrink: 0;
     }
-    #sidebar h1 { font-size: 15px; margin-bottom: 4px; }
+    #sidebar h1 { font-size: 15px; margin: 0; }
     #sidebarToggleBtn { display: inline-block !important; }
-    #sidebarBody { display: none; }
+    #sidebarBody {
+      display: none;
+      max-height: 38vh;
+      overflow-y: auto;
+      padding-top: 8px;
+    }
     #sidebarBody.open { display: block; }
     #levelInfo { font-size: 12px; }
     .cpuLink { font-size: 11.5px; }
-    .gateBtn { padding: 8px; font-size: 13px; margin: 4px 0; }
-    #toolbar { padding: 8px; gap: 6px; flex-wrap: wrap; }
+    .gateBtn { padding: 8px; font-size: 13px; margin: 3px 0; }
+    #toolbar { padding: 8px; gap: 6px; }
     #toolbar button { padding: 8px 12px; font-size: 13px; }
     #canvasWrap { flex: 1; min-height: 0; }
-    #truthTableWrap { max-height: 35vh; overflow-y: auto; }
+    #truthTableWrap { max-height: 30vh; overflow-y: auto; }
   }
   #sidebar h1 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
   #levelInfo { font-size: 13px; line-height: 1.5; margin-bottom: 12px; }
@@ -844,11 +848,7 @@ function onUp(clientX, clientY){
 }
 
 // Pointer Events で mouse・touch を一本化
-// setPointerCapture により innerHTML 再構築後もイベントが届き続ける
 svg.addEventListener('pointerdown', (e)=>{
-  e.preventDefault();
-  svg.setPointerCapture(e.pointerId);
-
   let el = document.elementFromPoint(e.clientX, e.clientY);
   let pinEl = el;
   while (pinEl && pinEl !== svg && !pinEl.dataset.pinid) pinEl = pinEl.parentElement;
@@ -856,8 +856,12 @@ svg.addEventListener('pointerdown', (e)=>{
   while (nodeEl && nodeEl !== svg && !nodeEl.dataset.nodeid) nodeEl = nodeEl.parentElement;
 
   if (pinEl && pinEl.dataset.pinid){
+    e.preventDefault();
     onPinTap(getPin(Number(pinEl.dataset.pinid)));
   } else if (nodeEl && nodeEl.dataset.nodeid){
+    // ドラッグ開始時のみキャプチャ（innerHTML再構築後もイベントが届くよう）
+    e.preventDefault();
+    svg.setPointerCapture(e.pointerId);
     startNodeDrag(getNode(Number(nodeEl.dataset.nodeid)), e.clientX, e.clientY);
   } else {
     wireStart = null; tempWireEnd = null; render();
