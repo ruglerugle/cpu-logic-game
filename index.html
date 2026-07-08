@@ -30,6 +30,36 @@
     border-right: 1px solid #2a2e3d;
     flex-shrink: 0;
   }
+  /* モバイルレイアウト */
+  @media (max-width: 600px) {
+    body { flex-direction: column; }
+    #sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid #2a2e3d;
+      padding: 10px 12px;
+      overflow-y: visible;
+    }
+    #sidebar h1 { font-size: 15px; margin-bottom: 4px; }
+    #levelInfo { font-size: 12px; }
+    .cpuLink { font-size: 11.5px; }
+    #sidebarToggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    #sidebarBody { display: none; }
+    #sidebarBody.open { display: block; }
+    .gateBtn { padding: 6px 8px; font-size: 13px; }
+    #toolbar button { padding: 5px 10px; font-size: 13px; }
+    #canvasWrap { flex: 1; min-height: 0; }
+    .pin { r: 9px; } /* bigger touch targets */
+  }
+  @media (min-width: 601px) {
+    #sidebarToggle .arrow { display: none; }
+  }
   #sidebar h1 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
   #levelInfo { font-size: 13px; line-height: 1.5; margin-bottom: 12px; }
   #levelInfo b { color: var(--accent); }
@@ -251,16 +281,21 @@
 <body>
 
 <div id="sidebar">
-  <h1>⚙ 論理回路でCPUを学ぶ</h1>
-  <div id="levelInfo"></div>
-  <div>
-    <div style="font-size:13px; color:#999; margin-bottom:4px;">ゲートを配置</div>
-    <button class="gateBtn" data-gate="NOT">NOT（1入力・反転）</button>
-    <button class="gateBtn" data-gate="AND">AND（両方1のとき1）</button>
-    <button class="gateBtn" data-gate="OR">OR（どちらか1で1）</button>
-    <button class="gateBtn" data-gate="XOR">XOR（一致しなければ1）</button>
+  <div id="sidebarToggle" onclick="toggleSidebar()">
+    <h1 style="margin:0;">⚙ 論理回路でCPUを学ぶ</h1>
+    <span class="arrow" id="sidebarArrow" style="font-size:18px; color:var(--accent);">▼</span>
   </div>
-  <div id="levelList"></div>
+  <div id="sidebarBody">
+    <div id="levelInfo"></div>
+    <div>
+      <div style="font-size:13px; color:#999; margin-bottom:4px;">ゲートを配置</div>
+      <button class="gateBtn" data-gate="NOT">NOT（1入力・反転）</button>
+      <button class="gateBtn" data-gate="AND">AND（両方1のとき1）</button>
+      <button class="gateBtn" data-gate="OR">OR（どちらか1で1）</button>
+      <button class="gateBtn" data-gate="XOR">XOR（一致しなければ1）</button>
+    </div>
+    <div id="levelList"></div>
+  </div>
 </div>
 
 <div id="introModal" style="display:none;">
@@ -689,11 +724,13 @@ function render(){
     g.addEventListener('mousedown', (e)=>{
       if (e.target.tagName === 'circle') return;
       e.stopPropagation();
-      dragNode = node;
-      const rectSvg = svg.getBoundingClientRect();
-      dragOffset.x = e.clientX - rectSvg.left - node.x;
-      dragOffset.y = e.clientY - rectSvg.top - node.y;
+      startNodeDrag(node, e.clientX, e.clientY);
     });
+    g.addEventListener('touchstart', (e)=>{
+      if (e.target.tagName === 'circle') return;
+      e.preventDefault(); e.stopPropagation();
+      startNodeDrag(node, e.touches[0].clientX, e.touches[0].clientY);
+    }, {passive:false});
 
     svg.appendChild(g);
 
@@ -709,28 +746,10 @@ function render(){
       c.setAttribute('fill', pin.value ? 'var(--wire-on)' : '#444');
       c.setAttribute('stroke', '#888');
       c.setAttribute('stroke-width', '1.5');
-      c.addEventListener('mousedown', (e)=>{
-        e.stopPropagation();
-        if (pin.kind === 'out'){
-          wireStart = pin.id;
-        } else {
-          // if already connected, remove that wire and start dragging from its source
-          const existing = wires.find(w=>w.toPin===pin.id);
-          if (existing){
-            wires = wires.filter(w=>w.id!==existing.id);
-            wireStart = existing.fromPin;
-          }
-        }
-      });
-      c.addEventListener('mouseup', (e)=>{
-        e.stopPropagation();
-        if (wireStart){
-          tryConnect(wireStart, pin.id);
-          wireStart = null;
-          tempWireEnd = null;
-          render();
-        }
-      });
+      c.addEventListener('mousedown', (e)=>{ e.stopPropagation(); startPinDrag(pin); });
+      c.addEventListener('touchstart', (e)=>{ e.preventDefault(); e.stopPropagation(); startPinDrag(pin); }, {passive:false});
+      c.addEventListener('mouseup', (e)=>{ e.stopPropagation(); endPinDrag(pin.id); });
+      c.addEventListener('touchend', (e)=>{ e.preventDefault(); e.stopPropagation(); endPinDrag(pin.id); }, {passive:false});
       svg.appendChild(c);
     });
   });
@@ -755,25 +774,42 @@ function tryConnect(pinAId, pinBId){
   wires.push({ id: uid(), fromPin: outPin.id, toPin: inPin.id });
 }
 
-svg.addEventListener('mousemove', (e)=>{
-  const rectSvg = svg.getBoundingClientRect();
-  const x = e.clientX - rectSvg.left, y = e.clientY - rectSvg.top;
-  if (dragNode){
-    dragNode.x = x - dragOffset.x;
-    dragNode.y = y - dragOffset.y;
-    render();
-  } else if (wireStart){
-    tempWireEnd = {x,y};
-    render();
+function svgXY(clientX, clientY){
+  const r = svg.getBoundingClientRect();
+  return { x: clientX - r.left, y: clientY - r.top };
+}
+function startNodeDrag(node, clientX, clientY){
+  dragNode = node;
+  const {x,y} = svgXY(clientX, clientY);
+  dragOffset.x = x - node.x;
+  dragOffset.y = y - node.y;
+}
+function startPinDrag(pin){
+  if (pin.kind === 'out'){
+    wireStart = pin.id;
+  } else {
+    const existing = wires.find(w=>w.toPin===pin.id);
+    if (existing){ wires = wires.filter(w=>w.id!==existing.id); wireStart = existing.fromPin; }
   }
-});
-svg.addEventListener('mouseup', ()=>{
+}
+function endPinDrag(pinId){
+  if (wireStart){ tryConnect(wireStart, pinId); wireStart = null; tempWireEnd = null; render(); }
+}
+function onMove(clientX, clientY){
+  const {x,y} = svgXY(clientX, clientY);
+  if (dragNode){ dragNode.x = x - dragOffset.x; dragNode.y = y - dragOffset.y; render(); }
+  else if (wireStart){ tempWireEnd = {x,y}; render(); }
+}
+function onUp(){
   dragNode = null;
   if (wireStart){ wireStart = null; tempWireEnd = null; render(); }
-});
-svg.addEventListener('mouseleave', ()=>{
-  dragNode = null;
-});
+}
+
+svg.addEventListener('mousemove', (e)=> onMove(e.clientX, e.clientY));
+svg.addEventListener('mouseup', onUp);
+svg.addEventListener('mouseleave', ()=>{ dragNode = null; });
+svg.addEventListener('touchmove', (e)=>{ e.preventDefault(); onMove(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+svg.addEventListener('touchend', (e)=>{ e.preventDefault(); onUp(); }, {passive:false});
 
 // ====================== ゲートパレット ======================
 document.querySelectorAll('.gateBtn').forEach(btn=>{
@@ -875,6 +911,20 @@ function showMsg(pass){
   el.textContent = pass ? '✓ 正解！すべての入力パターンで一致しました。' : '✗ 不一致あり。表を確認して回路を修正してください。';
   document.getElementById('status').textContent = pass ? 'クリア！' : '未クリア';
   setTimeout(()=>{ el.style.display='none'; }, 3000);
+}
+
+function toggleSidebar(){
+  if (window.innerWidth > 600) return;
+  const body = document.getElementById('sidebarBody');
+  const arrow = document.getElementById('sidebarArrow');
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+// モバイルでは初期状態を閉じる
+if (window.innerWidth <= 600){
+  document.getElementById('sidebarBody').classList.remove('open');
+} else {
+  document.getElementById('sidebarBody').classList.add('open');
 }
 
 // ====================== 起動 ======================
