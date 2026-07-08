@@ -703,6 +703,7 @@ function render(){
     rect.setAttribute('width', w);
     rect.setAttribute('height', h);
     rect.setAttribute('rx', 8);
+    rect.dataset.nodeid = node.id;
     let fill = '#252a3a';
     if (node.type==='INPUT') fill = '#2d3b2f';
     if (node.type==='OUTPUT') fill = '#3b2f2d';
@@ -736,15 +737,10 @@ function render(){
     }
 
     g.addEventListener('mousedown', (e)=>{
-      if (e.target.tagName === 'circle') return;
+      if (e.target.dataset.pinid) return;
       e.stopPropagation();
       startNodeDrag(node, e.clientX, e.clientY);
     });
-    g.addEventListener('touchstart', (e)=>{
-      if (e.target.tagName === 'circle') return;
-      e.preventDefault(); e.stopPropagation();
-      startNodeDrag(node, e.touches[0].clientX, e.touches[0].clientY);
-    }, {passive:false});
 
     svg.appendChild(g);
 
@@ -759,9 +755,9 @@ function render(){
       hitArea.setAttribute('r', 20);
       hitArea.setAttribute('fill', 'transparent');
       hitArea.dataset.pinid = pin.id;
+      // mousedownのみ（touchはSVGレベルで一括処理）
       const pinHandler = (e)=>{ e.stopPropagation(); e.preventDefault(); onPinTap(pin); };
       hitArea.addEventListener('mousedown', pinHandler);
-      hitArea.addEventListener('touchstart', pinHandler, {passive:false});
       svg.appendChild(hitArea);
       // 見た目の円
       const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
@@ -774,7 +770,6 @@ function render(){
       c.setAttribute('stroke', isSelected ? '#ffd54f' : '#888');
       c.setAttribute('stroke-width', isSelected ? '3' : '2');
       c.addEventListener('mousedown', pinHandler);
-      c.addEventListener('touchstart', pinHandler, {passive:false});
       svg.appendChild(c);
     });
   });
@@ -859,21 +854,42 @@ svg.addEventListener('mousemove', (e)=> onMove(e.clientX, e.clientY));
 svg.addEventListener('mouseup', (e)=>{ dragNode = null; });
 svg.addEventListener('mouseleave', ()=>{ dragNode = null; });
 svg.addEventListener('click', (e)=>{
-  // キャンバス背景クリックで選択キャンセル
   if (e.target === svg){ wireStart = null; tempWireEnd = null; render(); }
 });
+
+// タッチ：全操作をSVGレベルで一括処理（個別要素のtouchstartなし）
+svg.addEventListener('touchstart', (e)=>{
+  e.preventDefault();
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el && el.dataset.pinid){
+    // ピンをタップ
+    onPinTap(getPin(Number(el.dataset.pinid)));
+  } else if (el && el.dataset.nodeid){
+    // ノード本体をタップ → ドラッグ開始
+    startNodeDrag(getNode(Number(el.dataset.nodeid)), t.clientX, t.clientY);
+  } else {
+    // 背景タップ → 配線選択キャンセル
+    wireStart = null; tempWireEnd = null; render();
+  }
+}, {passive:false});
+
 svg.addEventListener('touchmove', (e)=>{
   e.preventDefault();
   onMove(e.touches[0].clientX, e.touches[0].clientY);
 }, {passive:false});
+
 svg.addEventListener('touchend', (e)=>{
   e.preventDefault();
   const t = e.changedTouches[0];
-  if (dragNode){ dragNode = null; return; }
+  if (dragNode){
+    dragNode = null;
+    render();
+    return;
+  }
   if (wireStart){
     const pin = pinFromPoint(t.clientX, t.clientY);
     if (pin){ tryConnect(wireStart, pin.id); wireStart = null; tempWireEnd = null; }
-    // 移動量が少なければタップ扱い（ピンに触れていない場合はキャンセルしない）
     render();
   }
 }, {passive:false});
