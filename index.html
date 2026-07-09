@@ -224,7 +224,7 @@ circle.carrier{transition:cx 0.4s ease}
     </div>
     <div>
       <div class="chapter-title">
-        <span id="head-level-title">レベル 1 / 10</span>
+        <span id="head-level-title">レベル 1 / 14</span>
         <span class="step-num" id="head-step">NOTゲート</span>
       </div>
       <div class="head-progress"><div class="head-progress-fill" id="prog"></div></div>
@@ -268,6 +268,7 @@ circle.carrier{transition:cx 0.4s ease}
           <button class="gateBtn" data-gate="AND">AND</button>
           <button class="gateBtn" data-gate="OR">OR</button>
           <button class="gateBtn" data-gate="XOR">XOR</button>
+          <button class="gateBtn" data-gate="NAND">NAND</button>
         </div>
         <div id="toolbar">
           <button id="backToIntroBtn" onclick="showIntro()">← 説明へ</button>
@@ -540,6 +541,75 @@ const LEVELS = [
       { who:'cat', img:'catThink', text:'そうだよ。CPUはこういう最適化を何十億回も積み重ねて作られているんだ。スイッチだけで計算できる仕組みを、最初から最後まで自分の手で体験できたね。' },
     ],
   },
+  {
+    name: "NANDゲートを使う",
+    label: "LEVEL 11",
+    shortName: "NAND",
+    desc: "A と B が両方1のときだけ OUT が0になるようにしてください。",
+    cpuLink: "NANDゲートはCMOS回路で最も効率よく作れるゲートです。ANDを作るにはトランジスタが6個必要ですが、NANDは4個で済みます。そのため実際のCPUチップは、ほぼ全回路がNANDゲートで実装されています。",
+    inputs: ["A","B"],
+    outputs: ["OUT"],
+    truth: (A,B) => [ (A&&B)?0:1 ],
+    dialogue: [
+      { who:'cat', img:'cat', text:'ここからはボーナスステージだよ。登場するのは<strong>NANDゲート</strong>——「NOT AND」の略で、ANDの出力を反転させたゲートなんだ。' },
+      { who:'rabbit', img:'rabbit', text:'ANDの逆……ということは、両方1のときだけ0になる？' },
+      { who:'cat', img:'catThink', text:'そう！真理値表を確認してみて。「両方1以外はすべて1」というのがポイントだよ。' },
+      { who:'rabbit', img:'rabbitThink', text:'なんでこのゲートがそんなに大事なんですか？' },
+      { who:'cat', img:'cat', text:'実はNANDだけでNOT・AND・OR・XOR、全部のゲートが作れるんだよ。次のレベルで確かめてみよう。' },
+    ],
+  },
+  {
+    name: "NOTをNANDで作る",
+    label: "LEVEL 12",
+    shortName: "NOT自作",
+    desc: "NANDゲートだけを使って、NOTと同じ動きを再現してください。ヒント：NANDの2つの入力に同じ信号を入れると……？",
+    cpuLink: "NAND(A,A) = NOT(AND(A,A)) = NOT(A) が成り立ちます。2入力に同じ信号を入れることで1入力ゲートとして使えます。これがNANDでNOTを作る最小構成です。",
+    hiddenGates: ["NOT","AND","OR","XOR"],
+    inputs: ["A"],
+    outputs: ["OUT"],
+    truth: (A) => [ A?0:1 ],
+    dialogue: [
+      { who:'rabbit', img:'rabbitThink', text:'NANDだけでNOTが作れるって……どういうことですか？' },
+      { who:'cat', img:'cat', text:'NAND(A,B) は「A と B が両方1なら0、それ以外は1」だよね。ここでAとBに<strong>同じ信号Aを入れてみて</strong>。' },
+      { who:'rabbit', img:'rabbit', text:'NAND(A,A)……？A=1なら両方1だから0、A=0なら両方0だから1……これってNOTじゃないですか！' },
+      { who:'cat', img:'catThink', text:'その通り！NANDの2本の入力を同じ線でつなぐだけで、NOTができるんだよ。NANDゲート1個で完成だね。' },
+    ],
+  },
+  {
+    name: "ANDをNANDで作る",
+    label: "LEVEL 13",
+    shortName: "AND自作2",
+    desc: "NANDゲートだけを使って、ANDと同じ動きを再現してください。",
+    cpuLink: "AND(A,B) = NOT(NAND(A,B)) = NAND(NAND(A,B), NAND(A,B)) です。NANDの出力をさらにNAND（2入力同じ）で反転させるとANDになります。",
+    hiddenGates: ["NOT","AND","OR","XOR"],
+    inputs: ["A","B"],
+    outputs: ["OUT"],
+    truth: (A,B) => [ (A&&B)?1:0 ],
+    dialogue: [
+      { who:'rabbit', img:'rabbit', text:'NOTができた！じゃあANDは？' },
+      { who:'cat', img:'cat', text:'AND = NOTのNAND版、つまり「NANDをもう一回反転」だよ。NAND(A,B) の出力を、さらにNAND(同じ入力)で反転させてみて。' },
+      { who:'rabbit', img:'rabbitThink', text:'NAND(NAND(A,B), NAND(A,B))……？前のレベルの NOT の作り方を使えばいい！' },
+      { who:'cat', img:'catThink', text:'完璧！NANDゲートが2個でANDの完成だよ。直接ANDを作るより部品が少なくて済むんだ。' },
+    ],
+  },
+  {
+    name: "ORをNANDで作る",
+    label: "LEVEL 14",
+    shortName: "OR自作2",
+    desc: "NANDゲートだけを使って、ORと同じ動きを再現してください。",
+    cpuLink: "ド・モルガンの法則より OR(A,B) = NOT(AND(NOT(A),NOT(B))) = NAND(NAND(A,A), NAND(B,B)) が成り立ちます。AとBをそれぞれNANDで反転してから、もう一度NANDに通すとORになります。",
+    hiddenGates: ["NOT","AND","OR","XOR"],
+    inputs: ["A","B"],
+    outputs: ["OUT"],
+    truth: (A,B) => [ (A||B)?1:0 ],
+    dialogue: [
+      { who:'rabbit', img:'rabbit', text:'NOT・ANDときたら次はOR！NANDだけで作れますか？' },
+      { who:'cat', img:'cat', text:'もちろん。ヒントはド・モルガンの法則だよ。OR(A,B) = NOT(AND(NOT(A), NOT(B))) ——つまり<strong>AとBを先にそれぞれNOT（＝NAND自己接続）してから、NANDに通す</strong>と完成だよ。' },
+      { who:'rabbit', img:'rabbitThink', text:'NAND(NAND(A,A), NAND(B,B))……！NANDが3個でORになる！' },
+      { who:'cat', img:'catThink', text:'そう。NOT・AND・ORがNANDだけで作れたね。XORも4個のNANDで作れるよ。これがNANDを「万能ゲート」と呼ぶ理由なんだ。実際のCPUチップもこの原理で動いているんだよ。' },
+      { who:'rabbit', img:'rabbit', text:'NANDゲートが積み重なって、最終的にCPUになってるんですね……なんかすごい！' },
+    ],
+  },
 ];
 
 // ====================== 状態 ======================
@@ -660,7 +730,7 @@ function addNode(type, x, y, opts={}){
   const id = uid();
   let inCount = 0;
   if (type==='NOT') inCount=1;
-  else if (type==='AND'||type==='OR'||type==='XOR') inCount=2;
+  else if (type==='AND'||type==='OR'||type==='XOR'||type==='NAND') inCount=2;
   else if (type==='INPUT') inCount=0;
   else if (type==='OUTPUT') inCount=1;
   const node = {id, type, x, y, label:opts.label||type, inPins:[], outPins:[], value:0};
@@ -717,6 +787,7 @@ function evalCircuit(inputValues){
       case 'AND': out=(inVals[0]&&inVals[1])?1:0; break;
       case 'OR': out=(inVals[0]||inVals[1])?1:0; break;
       case 'XOR': out=(inVals[0]!==inVals[1])?1:0; break;
+      case 'NAND': out=(inVals[0]&&inVals[1])?0:1; break;
       case 'OUTPUT': out=inVals[0]; break;
       default: out=0;
     }
@@ -1000,6 +1071,39 @@ const SOLUTIONS = [
     wire(inp[0],an1,0); wire(inp[1],an1,1);
     wire(xr,an2,0);     wire(inp[2],an2,1);
     wire(an1,or,0);     wire(an2,or,1);
+    wire(or,out[0]);
+  },
+  // 10: NAND: A,B→NAND→OUT
+  (inp,out,cx)=>{
+    const g=addNode('NAND',cx-36,100);
+    wire(inp[0],g,0); wire(inp[1],g,1); wire(g,out[0]);
+  },
+  // 11: NOT自作: NAND(A,A)
+  (inp,out,cx)=>{
+    const span=out[0].x-inp[0].x;
+    const g=addNode('NAND',inp[0].x+span*0.5,80);
+    wire(inp[0],g,0); wire(inp[0],g,1); wire(g,out[0]);
+  },
+  // 12: AND自作2: NAND(NAND(A,B), NAND(A,B))
+  (inp,out,cx)=>{
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.38, x2=inp[0].x+span*0.68;
+    const n1=addNode('NAND',x1,100);
+    const n2=addNode('NAND',x2,100);
+    wire(inp[0],n1,0); wire(inp[1],n1,1);
+    wire(n1,n2,0); wire(n1,n2,1);
+    wire(n2,out[0]);
+  },
+  // 13: OR自作2: NAND(NAND(A,A), NAND(B,B))
+  (inp,out,cx)=>{
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.28, x2=inp[0].x+span*0.65;
+    const na=addNode('NAND',x1,60);
+    const nb=addNode('NAND',x1,180);
+    const or=addNode('NAND',x2,120);
+    wire(inp[0],na,0); wire(inp[0],na,1);
+    wire(inp[1],nb,0); wire(inp[1],nb,1);
+    wire(na,or,0); wire(nb,or,1);
     wire(or,out[0]);
   },
 ];
