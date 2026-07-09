@@ -98,9 +98,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 .app-shell.side-collapsed .side-level{grid-template-columns:1fr;justify-items:center;min-height:48px;padding:6px 4px}
 .app-shell.side-collapsed .side-level>div:nth-child(2),.app-shell.side-collapsed .side-level>div:nth-child(3){display:none}
 
-/* ── Desktop: サイドバーは常に展開・トグルボタン非表示 ── */
+/* ── Desktop: サイドバーは常に展開 ── */
 @media(min-width:901px){
-  .side-toggle,.head-btn{display:none !important}
   .app-shell.side-collapsed .game-layout{grid-template-columns:230px minmax(0,1fr) !important}
   .app-shell.side-collapsed .side-panel{width:auto}
   .app-shell.side-collapsed .side-head{justify-content:space-between;padding:10px}
