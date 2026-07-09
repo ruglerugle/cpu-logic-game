@@ -310,36 +310,7 @@ circle.carrier{transition:cx 0.4s ease}
           <h2 class="clear-title">全レベルクリア！</h2>
           <p class="clear-sub">おめでとうございます。NANDゲートまで完走しました。</p>
         </div>
-        <div class="dialog-scene">
-          <div class="dialog-row">
-            <div class="dialog-character"><img src="images/cat.png" alt="ねこ先生"><div class="dialog-name cat">ねこ先生</div></div>
-            <div class="dialog-bubble">ここまで来たら、全部つながるよ。このゲームで作ってきたことを振り返ってみよう。</div>
-          </div>
-          <div class="dialog-row right">
-            <div class="dialog-character"><img src="images/rabbit.png" alt="うさ美"><div class="dialog-name rabbit">うさ美</div></div>
-            <div class="dialog-bubble">NOT・AND・OR・XOR……全部作りましたね。</div>
-          </div>
-          <div class="dialog-row">
-            <div class="dialog-character"><img src="images/catThink.png" alt="ねこ先生"><div class="dialog-name cat">ねこ先生</div></div>
-            <div class="dialog-bubble">そして後半で、XORはAND・OR・NOTだけで作れることも示したね。</div>
-          </div>
-          <div class="dialog-row right">
-            <div class="dialog-character"><img src="images/rabbitThink.png" alt="うさ美"><div class="dialog-name rabbit">うさ美</div></div>
-            <div class="dialog-bubble">はい。<strong>AND(OR(A,B), NOT(AND(A,B)))</strong> でしたよね。</div>
-          </div>
-          <div class="dialog-row">
-            <div class="dialog-character"><img src="images/cat.png" alt="ねこ先生"><div class="dialog-name cat">ねこ先生</div></div>
-            <div class="dialog-bubble">そしてNANDの章では、NOT・AND・ORの全部がNANDだけで作れることを確かめたね。</div>
-          </div>
-          <div class="dialog-row right">
-            <div class="dialog-character"><img src="images/rabbit.png" alt="うさ美"><div class="dialog-name rabbit">うさ美</div></div>
-            <div class="dialog-bubble">ということは……NOT・AND・OR → XOR も、全部NANDで作れる！</div>
-          </div>
-          <div class="dialog-row">
-            <div class="dialog-character"><img src="images/catThink.png" alt="ねこ先生"><div class="dialog-name cat">ねこ先生</div></div>
-            <div class="dialog-bubble">その通り。まとめると——</div>
-          </div>
-        </div>
+        <div class="dialog-scene" id="clear-dialog-1"></div>
         <div class="clear-flow">
           <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">NOT</span></div>
           <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">AND</span></div>
@@ -348,16 +319,7 @@ circle.carrier{transition:cx 0.4s ease}
           <div class="flow-item wide"><span class="flow-gate muted">NOT+AND+OR+XOR</span><span class="flow-arrow">→</span><span class="flow-gate">半加算器・全加算器・ALU</span></div>
           <div class="flow-result">つまり <strong>NANDゲート1種類だけで CPU が作れる</strong></div>
         </div>
-        <div class="dialog-scene">
-          <div class="dialog-row right">
-            <div class="dialog-character"><img src="images/rabbitThink.png" alt="うさ美"><div class="dialog-name rabbit">うさ美</div></div>
-            <div class="dialog-bubble">スイッチが2つあるだけのNANDが、CPUの計算全部を支えてるんですね……！</div>
-          </div>
-          <div class="dialog-row">
-            <div class="dialog-character"><img src="images/cat.png" alt="ねこ先生"><div class="dialog-name cat">ねこ先生</div></div>
-            <div class="dialog-bubble">そう。何十億個ものNANDが積み重なって、いまあなたが使っているコンピュータになっているんだよ。</div>
-          </div>
-        </div>
+        <div class="dialog-scene" id="clear-dialog-2"></div>
         <div class="intro-actions">
           <button class="btn btn-p" onclick="loadLevel(0)">最初から遊ぶ</button>
         </div>
@@ -744,17 +706,7 @@ function loadLevel(idx){
   document.getElementById('intro-desc').textContent = lv.desc.replace(/\n/g,' ');
 
   // ダイアログ
-  const scene = document.getElementById('dialog-scene');
-  scene.innerHTML = lv.dialogue.map(d => {
-    const isRabbit = d.who === 'rabbit';
-    return `<div class="dialog-row${isRabbit?' right':''}">
-      <div class="dialog-character">
-        <img src="images/${d.img}.png" alt="${isRabbit?'うさ美':'ねこ先生'}">
-        <div class="dialog-name ${d.who}">${isRabbit?'うさ美':'ねこ先生'}</div>
-      </div>
-      <div class="dialog-bubble">${d.text}</div>
-    </div>`;
-  }).join('');
+  document.getElementById('dialog-scene').innerHTML = renderDialogue(lv.dialogue);
 
   // CPUリンク
   document.getElementById('cpu-link-area').innerHTML = lv.cpuLink
@@ -1278,11 +1230,40 @@ document.getElementById('nextLevelBtn').addEventListener('pointerup',(e)=>{
 function hideNextBtn(){
   document.getElementById('nextLevelBtn').style.display='none';
 }
+function renderDialogue(dialogue){
+  return dialogue.map(d => {
+    const isRabbit = d.who === 'rabbit';
+    return `<div class="dialog-row${isRabbit?' right':''}">
+      <div class="dialog-character">
+        <img src="images/${d.img}.png" alt="${isRabbit?'うさ美':'ねこ先生'}">
+        <div class="dialog-name ${d.who}">${isRabbit?'うさ美':'ねこ先生'}</div>
+      </div>
+      <div class="dialog-bubble">${d.text}</div>
+    </div>`;
+  }).join('');
+}
+
+const CLEAR_DIALOGUE_1 = [
+  { who:'cat',    img:'cat',        text:'ここまで来たら、全部つながるよ。このゲームで作ってきたことを振り返ってみよう。' },
+  { who:'rabbit', img:'rabbit',     text:'NOT・AND・OR・XOR……全部作りましたね。' },
+  { who:'cat',    img:'catThink',   text:'そして後半で、XORはAND・OR・NOTだけで作れることも示したね。' },
+  { who:'rabbit', img:'rabbitThink',text:'はい。<strong>AND(OR(A,B), NOT(AND(A,B)))</strong> でしたよね。' },
+  { who:'cat',    img:'cat',        text:'そしてNANDの章では、NOT・AND・ORの全部がNANDだけで作れることを確かめたね。' },
+  { who:'rabbit', img:'rabbit',     text:'ということは……NOT・AND・OR → XOR も、全部NANDで作れる！' },
+  { who:'cat',    img:'catThink',   text:'その通り。まとめると——' },
+];
+const CLEAR_DIALOGUE_2 = [
+  { who:'rabbit', img:'rabbitThink',text:'スイッチが2つあるだけのNANDが、CPUの計算全部を支えてるんですね……！' },
+  { who:'cat',    img:'cat',        text:'そう。何十億個ものNANDが積み重なって、いまあなたが使っているコンピュータになっているんだよ。' },
+];
+
 function showClearScreen(){
   document.getElementById('game-screen').style.display='none';
   document.getElementById('intro-screen').style.display='none';
-  document.getElementById('clear-screen').style.display='flex';
+  document.getElementById('clear-screen').style.display='';
   document.getElementById('app-shell').classList.remove('game-mode');
+  document.getElementById('clear-dialog-1').innerHTML = renderDialogue(CLEAR_DIALOGUE_1);
+  document.getElementById('clear-dialog-2').innerHTML = renderDialogue(CLEAR_DIALOGUE_2);
 }
 function goNextLevel(){
   if(currentLevelIdx<LEVELS.length-1){
