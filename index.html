@@ -101,11 +101,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 /* ── Desktop: サイドバーは常に展開 ── */
 @media(min-width:901px){
   .app-shell.side-collapsed .game-layout{grid-template-columns:230px minmax(0,1fr) !important}
-  .app-shell.side-collapsed .side-panel{width:auto}
-  .app-shell.side-collapsed .side-head{justify-content:space-between;padding:10px}
-  .app-shell.side-collapsed .side-head-text,.app-shell.side-collapsed .side-gate-section,.app-shell.side-collapsed .side-section-label{display:block}
-  .app-shell.side-collapsed .side-level{grid-template-columns:28px 1fr 20px;justify-items:start;min-height:64px;padding:8px 10px}
-  .app-shell.side-collapsed .side-level>div:nth-child(2),.app-shell.side-collapsed .side-level>div:nth-child(3){display:block}
+  .app-shell.side-collapsed .side-panel{width:auto !important}
+  .app-shell.side-collapsed .side-head{justify-content:space-between !important;padding:10px !important}
+  .app-shell.side-collapsed .side-head-text,.app-shell.side-collapsed .side-gate-section,.app-shell.side-collapsed .side-section-label{display:block !important}
+  .app-shell.side-collapsed .side-level{grid-template-columns:28px 1fr 20px !important;justify-items:start !important;min-height:64px !important;padding:8px 10px !important}
+  .app-shell.side-collapsed .side-level>div:nth-child(2),.app-shell.side-collapsed .side-level>div:nth-child(3){display:block !important}
 }
 
 /* ── Main area ── */
