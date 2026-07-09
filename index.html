@@ -224,7 +224,7 @@ circle.carrier{transition:cx 0.4s ease}
     </div>
     <div>
       <div class="chapter-title">
-        <span id="head-level-title">レベル 1 / 7</span>
+        <span id="head-level-title">レベル 1 / 8</span>
         <span class="step-num" id="head-step">NOTゲート</span>
       </div>
       <div class="head-progress"><div class="head-progress-fill" id="prog"></div></div>
@@ -433,8 +433,27 @@ const LEVELS = [
     ],
   },
   {
-    name: "半加算器（Half Adder）",
+    name: "XORをAND/OR/NOTで作る",
     label: "LEVEL 5",
+    shortName: "XOR自作",
+    desc: "XORゲートを使わずに、AND・OR・NOTだけでXORと同じ動きを再現してください。",
+    cpuLink: "実際のCPU内部でも、XORは複数のNANDゲートや基本ゲートの組み合わせで実装されています。「このゲートを別の部品で置き換えられるか？」と考える力が、回路設計の本質です。",
+    hiddenGates: ["XOR"],
+    inputs: ["A","B"],
+    outputs: ["OUT"],
+    truth: (A,B) => [ (A!==B)?1:0 ],
+    dialogue: [
+      { who:'cat', img:'cat', text:'XORゲートの動きは覚えたな。では今度は<strong>XORゲートを使わずに</strong>、AND・OR・NOTだけで同じ動きを再現してみよう。' },
+      { who:'rabbit', img:'rabbitThink', text:'XORをXOR以外で作る……？どうすればいいんでしょう。' },
+      { who:'cat', img:'catThink', text:'ヒント：XORとORの真理値表を比べてみろ。どこが違う？' },
+      { who:'rabbit', img:'rabbit', text:'A=1、B=1のときだけ違う！ORは1なのに、XORは0になる。「両方1のときだけORから除外する」感じですか？' },
+      { who:'cat', img:'cat', text:'完璧な気づきだ。「ORで1になる」かつ「ANDで1にならない」——つまり <strong>AND(OR(A,B), NOT(AND(A,B)))</strong> がXORと同じになる。ゲートは4つで済む。' },
+      { who:'rabbit', img:'rabbitThink', text:'なるほど……「ORだけど両方1はダメ」を NOT(AND) で除外するんですね！' },
+    ],
+  },
+  {
+    name: "半加算器（Half Adder）",
+    label: "LEVEL 6",
     shortName: "半加算器",
     desc: "A + B を2進数で計算してください。SUM=下位ビット, CARRY=桁上がり。\nヒント: SUM=XOR(A,B), CARRY=AND(A,B)",
     cpuLink: "これがCPUの「足し算」の最小単位です。CPUが 1+1 を計算するとき、人間が筆算で繰り上がりを考えるのと同じことを、このXORとANDの組み合わせ回路が一瞬でやっています。CPU内部のALU（算術論理演算装置）は、この回路をたくさん並べて作られています。",
@@ -450,7 +469,7 @@ const LEVELS = [
   },
   {
     name: "全加算器（Full Adder）",
-    label: "LEVEL 6",
+    label: "LEVEL 7",
     shortName: "全加算器",
     desc: "A, B, 前の桁からの桁上がり Cin を足し合わせ、SUM と Cout を出してください。CPUの足し算回路の基本単位です。",
     cpuLink: "1桁の足し算（半加算器）だけでは「前の桁からの繰り上がり」を扱えません。全加算器はCinを受け取れるようにした拡張版です。これを8個・32個・64個と横に並べてCoutを次のCinにつなげると、CPUは8bit/32bit/64bitの大きな数を一度に足し算できるようになります。",
@@ -466,7 +485,7 @@ const LEVELS = [
   },
   {
     name: "簡易ALU: AND/ORセレクタ",
-    label: "LEVEL 7",
+    label: "LEVEL 8",
     shortName: "ALU",
     desc: "SEL=0のときOUT=AND(A,B), SEL=1のときOUT=OR(A,B)。これはCPUのALUが演算を切り替える仕組みの基本形です。",
     cpuLink: "CPUの命令には「足し算しろ」「ANDを取れ」「比較しろ」など色々な種類があります。ALU（算術論理演算装置）はこれらの演算回路をすべて内部に持っていて、命令から来るSEL信号（制御信号）で「どの演算結果を出力するか」を切り替えています。これがCPUが命令ごとに違う計算をできる仕組みの正体です。",
@@ -479,8 +498,10 @@ const LEVELS = [
       { who:'cat', img:'catThink', text:'入力は A・B・SEL の3本。<strong>SEL=0のときは AND(A,B)、SEL=1のときは OR(A,B)</strong> を出力する。SEL信号が「どの演算をするか」を命令するスイッチだ。' },
       { who:'rabbit', img:'rabbitThink', text:'真理値表を書いてみると……あれ、これって「3つの入力のうち2つ以上が1なら1」と同じ結果になりませんか？' },
       { who:'cat', img:'cat', text:'よく気づいた！その通り。これは<strong>多数決回路（Majority Gate）</strong>とも呼ばれる。同じ真理値表を持つ回路が複数の「意味」を持てる——それが論理回路の面白いところだ。' },
-      { who:'rabbit', img:'rabbit', text:'AND/ORセレクタでもあり、多数決回路でもある……どちらの視点で作ってもOKなんですね！' },
-      { who:'cat', img:'catThink', text:'そう。CPUはこういう回路を何十億個と組み合わせて動いている。スイッチだけで計算できる——その仕組みをこのゲームで一通り体験したことになるぞ。' },
+      { who:'rabbit', img:'rabbitThink', text:'ということは……A と B が違うとき（XOR=1）だけ SEL が結果を決める。A と B が同じときは SEL 関係なく AND の結果がそのまま出る。だったら <strong>OR(AND(A,B), AND(XOR(A,B), SEL))</strong> で4ゲートで書けませんか？' },
+      { who:'cat', img:'cat', text:'完璧だ！解答例の6ゲートより短い。XOR で「A と B が違うかどうか」を先に判定して、その情報を使って SEL を活かすかどうかを決める——これが論理回路の最適化だ。' },
+      { who:'rabbit', img:'rabbit', text:'「正解は1つじゃない」んですね。もっとシンプルな答えを探すのが設計の醍醐味か……！' },
+      { who:'cat', img:'catThink', text:'そう。CPUはこういう最適化を何十億回も積み重ねて作られている。スイッチだけで計算できる仕組みを、最初から最後まで自分の手で体験したことになるぞ。' },
     ],
   },
 ];
@@ -514,6 +535,11 @@ function startGame(){
   document.getElementById('intro-screen').style.display = 'none';
   document.getElementById('game-screen').style.display = 'flex';
   document.getElementById('app-shell').classList.add('game-mode');
+  // hiddenGates: そのレベルで使用不可のゲートボタンを隠す
+  const hidden = LEVELS[currentLevelIdx].hiddenGates || [];
+  document.querySelectorAll('#gate-bar .gateBtn').forEach(btn => {
+    btn.style.display = hidden.includes(btn.dataset.gate) ? 'none' : '';
+  });
   resetCircuit();
 }
 
@@ -863,7 +889,19 @@ const SOLUTIONS = [
     const g=addNode('XOR',cx-36,100);
     wire(inp[0],g,0); wire(inp[1],g,1); wire(g,out[0]);
   },
-  // 4: Half Adder: XOR→SUM, AND→CARRY (A,Bを両方に接続)
+  // 4: XOR自作: AND(OR(A,B), NOT(AND(A,B)))
+  (inp,out,cx)=>{
+    const or =addNode('OR', cx-120,60);
+    const an1=addNode('AND',cx-120,180);
+    const nt =addNode('NOT',cx+20, 180);
+    const an2=addNode('AND',cx+140,120);
+    wire(inp[0],or,0);  wire(inp[1],or,1);
+    wire(inp[0],an1,0); wire(inp[1],an1,1);
+    wire(an1,nt);
+    wire(or,an2,0); wire(nt,an2,1);
+    wire(an2,out[0]);
+  },
+  // 5: Half Adder: XOR→SUM, AND→CARRY (A,Bを両方に接続)
   (inp,out,cx)=>{
     const xr=addNode('XOR',cx-36,60);
     const an=addNode('AND',cx-36,170);
@@ -871,7 +909,7 @@ const SOLUTIONS = [
     wire(inp[0],an,0); wire(inp[1],an,1);
     wire(xr,out[0]); wire(an,out[1]);
   },
-  // 5: Full Adder: XOR1(A,B)→XOR2(,Cin)→SUM; AND1(A,B), AND2(XOR1,Cin)→OR→Cout
+  // 6: Full Adder: XOR1(A,B)→XOR2(,Cin)→SUM; AND1(A,B), AND2(XOR1,Cin)→OR→Cout
   (inp,out,cx)=>{
     const xr1=addNode('XOR',cx-130,60);
     const xr2=addNode('XOR',cx+10,60);
@@ -886,21 +924,17 @@ const SOLUTIONS = [
     wire(an1,or,0); wire(an2,or,1);
     wire(or,out[1]);
   },
-  // 6: ALU: AND(A,B)→AND(,NOT(SEL))→OR→OUT; OR(A,B)→AND(,SEL)→OR
+  // 6: ALU: OR(AND(A,B), AND(XOR(A,B), SEL)) — 4ゲートの最小構成
   (inp,out,cx)=>{
-    const an1=addNode('AND',cx-140,50);
-    const or1=addNode('OR', cx-140,160);
-    const nt =addNode('NOT',cx-20, 270);
-    const an2=addNode('AND',cx+60, 50);
-    const an3=addNode('AND',cx+60, 160);
-    const or2=addNode('OR', cx+190,105);
+    const xr =addNode('XOR',cx-120,60);
+    const an1=addNode('AND',cx-120,180);
+    const an2=addNode('AND',cx+20, 60);
+    const or =addNode('OR', cx+160,120);
+    wire(inp[0],xr,0);  wire(inp[1],xr,1);
     wire(inp[0],an1,0); wire(inp[1],an1,1);
-    wire(inp[0],or1,0); wire(inp[1],or1,1);
-    wire(inp[2],nt,0);
-    wire(an1,an2,0); wire(nt,an2,1);
-    wire(or1,an3,0); wire(inp[2],an3,1);
-    wire(an2,or2,0); wire(an3,or2,1);
-    wire(or2,out[0]);
+    wire(xr,an2,0);     wire(inp[2],an2,1);
+    wire(an1,or,0);     wire(an2,or,1);
+    wire(or,out[0]);
   },
 ];
 
