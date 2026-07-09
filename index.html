@@ -98,6 +98,21 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 .app-shell.side-collapsed .side-level{grid-template-columns:1fr;justify-items:center;min-height:48px;padding:6px 4px}
 .app-shell.side-collapsed .side-level>div:nth-child(2),.app-shell.side-collapsed .side-level>div:nth-child(3){display:none}
 
+/* ── Wide desktop: トグルボタン非表示 ── */
+@media(min-width:1200px){
+  .side-toggle,.head-btn{display:none !important}
+}
+
+/* ── Desktop: サイドバーは常に展開 ── */
+@media(min-width:901px){
+  .app-shell.side-collapsed .game-layout{grid-template-columns:230px minmax(0,1fr)}
+  .app-shell.side-collapsed .side-panel{width:auto}
+  .app-shell.side-collapsed .side-head{justify-content:space-between;padding:10px}
+  .app-shell.side-collapsed .side-head-text,.app-shell.side-collapsed .side-gate-section,.app-shell.side-collapsed .side-section-label{display:block}
+  .app-shell.side-collapsed .side-level{grid-template-columns:28px 1fr 20px;justify-items:start;min-height:64px;padding:8px 10px}
+  .app-shell.side-collapsed .side-level>div:nth-child(2),.app-shell.side-collapsed .side-level>div:nth-child(3){display:block}
+}
+
 /* ── Main area ── */
 .main-area{background:var(--paper);border:1px solid #d8e2ec;border-radius:8px;padding:16px 14px 10px;box-shadow:var(--shadow);overflow:auto;min-height:500px}
 
