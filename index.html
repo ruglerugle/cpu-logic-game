@@ -891,10 +891,12 @@ const SOLUTIONS = [
   },
   // 4: XOR自作: AND(OR(A,B), NOT(AND(A,B)))
   (inp,out,cx)=>{
-    const or =addNode('OR', cx-120,60);
-    const an1=addNode('AND',cx-120,180);
-    const nt =addNode('NOT',cx+20, 180);
-    const an2=addNode('AND',cx+140,120);
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.22, x2=inp[0].x+span*0.52, x3=inp[0].x+span*0.75;
+    const or =addNode('OR', x1,60);
+    const an1=addNode('AND',x1,180);
+    const nt =addNode('NOT',x2,180);
+    const an2=addNode('AND',x3,120);
     wire(inp[0],or,0);  wire(inp[1],or,1);
     wire(inp[0],an1,0); wire(inp[1],an1,1);
     wire(an1,nt);
@@ -911,11 +913,13 @@ const SOLUTIONS = [
   },
   // 6: Full Adder: XOR1(A,B)→XOR2(,Cin)→SUM; AND1(A,B), AND2(XOR1,Cin)→OR→Cout
   (inp,out,cx)=>{
-    const xr1=addNode('XOR',cx-130,60);
-    const xr2=addNode('XOR',cx+10,60);
-    const an1=addNode('AND',cx-130,190);
-    const an2=addNode('AND',cx+10,190);
-    const or=addNode('OR',cx+150,125);
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.2, x2=inp[0].x+span*0.5, x3=inp[0].x+span*0.75;
+    const xr1=addNode('XOR',x1,60);
+    const xr2=addNode('XOR',x2,60);
+    const an1=addNode('AND',x1,190);
+    const an2=addNode('AND',x2,190);
+    const or=addNode('OR',x3,125);
     wire(inp[0],xr1,0); wire(inp[1],xr1,1);
     wire(xr1,xr2,0);   wire(inp[2],xr2,1);
     wire(xr2,out[0]);
@@ -924,12 +928,14 @@ const SOLUTIONS = [
     wire(an1,or,0); wire(an2,or,1);
     wire(or,out[1]);
   },
-  // 6: ALU: OR(AND(A,B), AND(XOR(A,B), SEL)) — 4ゲートの最小構成
+  // 7: ALU: OR(AND(A,B), AND(XOR(A,B), SEL)) — 4ゲートの最小構成
   (inp,out,cx)=>{
-    const xr =addNode('XOR',cx-120,60);
-    const an1=addNode('AND',cx-120,180);
-    const an2=addNode('AND',cx+20, 60);
-    const or =addNode('OR', cx+160,120);
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.2, x2=inp[0].x+span*0.55, x3=inp[0].x+span*0.78;
+    const xr =addNode('XOR',x1,60);
+    const an1=addNode('AND',x1,180);
+    const an2=addNode('AND',x2,60);
+    const or =addNode('OR', x3,120);
     wire(inp[0],xr,0);  wire(inp[1],xr,1);
     wire(inp[0],an1,0); wire(inp[1],an1,1);
     wire(xr,an2,0);     wire(inp[2],an2,1);
