@@ -288,7 +288,7 @@ circle.carrier{transition:cx 0.4s ease}
           <button id="clearBtn" class="btn">クリア</button>
           <button id="answerBtn" class="btn">解答</button>
           <div id="status"></div>
-          <button id="nextLevelBtn" class="btn btn-next" style="display:none" onclick="goNextLevel()">次のレベルへ →</button>
+          <button id="nextLevelBtn" class="btn btn-next" style="display:none">次のレベルへ →</button>
         </div>
         <div id="truthTableWrap">
           <div id="truthTableHeader">
@@ -1269,8 +1269,12 @@ function showNextBtn(){
   const isLast=currentLevelIdx>=LEVELS.length-1;
   btn.textContent=isLast?'🎉 全レベルクリア！':'次のレベルへ →';
   btn.style.display='inline-flex';
-  btn.onclick=isLast?showClearScreen:goNextLevel;
+  btn.dataset.last=isLast?'1':'0';
 }
+document.getElementById('nextLevelBtn').addEventListener('pointerup',(e)=>{
+  e.stopPropagation();
+  if(e.currentTarget.dataset.last==='1') showClearScreen(); else goNextLevel();
+});
 function hideNextBtn(){
   document.getElementById('nextLevelBtn').style.display='none';
 }
