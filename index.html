@@ -474,10 +474,13 @@ const LEVELS = [
     outputs: ["OUT"],
     truth: (A,B,SEL) => { return [ SEL ? (A|B) : (A&B) ]; },
     dialogue: [
-      { who:'cat', img:'cat', text:'最後のレベルだ。<strong>ALU（算術論理演算装置）</strong>の基本形を作ろう。' },
-      { who:'rabbit', img:'rabbit', text:'ALUって……CPUの中で計算する部分ですよね？いよいよ核心ですか！' },
-      { who:'cat', img:'catThink', text:'そう。<strong>SEL信号</strong>で「ANDを計算するか、ORを計算するか」を切り替える。命令によって演算を選ぶ仕組みだ。' },
-      { who:'rabbit', img:'rabbitThink', text:'スイッチの組み合わせでCPUが作れる……これを何十億個も並べてるんですね！すごい！' },
+      { who:'cat', img:'cat', text:'最後のレベルだ。<strong>ALU（算術論理演算装置）</strong>の基本形を作ろう。CPUの中で実際に計算を担当する部品だ。' },
+      { who:'rabbit', img:'rabbit', text:'ALUって……これまで作ってきたゲートが全部つながる感じですよね！で、どんな回路を組むんですか？' },
+      { who:'cat', img:'catThink', text:'入力は A・B・SEL の3本。<strong>SEL=0のときは AND(A,B)、SEL=1のときは OR(A,B)</strong> を出力する。SEL信号が「どの演算をするか」を命令するスイッチだ。' },
+      { who:'rabbit', img:'rabbitThink', text:'真理値表を書いてみると……あれ、これって「3つの入力のうち2つ以上が1なら1」と同じ結果になりませんか？' },
+      { who:'cat', img:'cat', text:'よく気づいた！その通り。これは<strong>多数決回路（Majority Gate）</strong>とも呼ばれる。同じ真理値表を持つ回路が複数の「意味」を持てる——それが論理回路の面白いところだ。' },
+      { who:'rabbit', img:'rabbit', text:'AND/ORセレクタでもあり、多数決回路でもある……どちらの視点で作ってもOKなんですね！' },
+      { who:'cat', img:'catThink', text:'そう。CPUはこういう回路を何十億個と組み合わせて動いている。スイッチだけで計算できる——その仕組みをこのゲームで一通り体験したことになるぞ。' },
     ],
   },
 ];
