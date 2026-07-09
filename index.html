@@ -1269,7 +1269,11 @@ function showClearScreen(){
     'NAND → NOT　/　NAND → AND　/　NAND → OR<br>' +
     'NOT+AND+OR → XOR<br>' +
     'NOT+AND+OR+XOR → 半加算器・全加算器・ALU<br>' +
-    '<strong>つまり、NANDゲート1種類だけで CPU が作れる</strong>';
+    '<strong>つまり、NANDゲート1種類だけで CPU が作れる</strong>' +
+    '<hr style="margin:12px 0;border-color:rgba(255,255,255,.2)">' +
+    '<small>実際のCPUもトランジスタ2〜3個でNANDを構成し、それを何十億個も組み合わせて作られています。' +
+    '速度・消費電力の最適化のためNORや複合ゲート（AOIなど）も使われますが、' +
+    '「NANDだけで何でも作れる」という普遍性はこのゲームで示した通りです。</small>';
   document.getElementById('clear-dialog-2').innerHTML=renderDialogue(CLEAR_DIALOGUE_2);
   document.getElementById('clear-screen').style.display='';
 }
