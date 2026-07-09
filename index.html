@@ -530,7 +530,7 @@ const LEVELS = [
     outputs: ["OUT"],
     truth: (A,B,SEL) => { return [ SEL ? (A|B) : (A&B) ]; },
     dialogue: [
-      { who:'cat', img:'cat', text:'いよいよ最後のレベルだよ。<strong>ALU（算術論理演算装置）</strong>の基本形を作ってみよう。CPUの中で実際に計算を担当する部品なんだ。' },
+      { who:'cat', img:'cat', text:'いよいよCPUの核心だよ。<strong>ALU（算術論理演算装置）</strong>の基本形を作ってみよう。CPUの中で実際に計算を担当する部品なんだ。' },
       { who:'rabbit', img:'rabbit', text:'ALUって……これまで作ってきたゲートが全部つながる感じですよね！で、どんな回路を組むんですか？' },
       { who:'cat', img:'catThink', text:'入力は A・B・SEL の3本。<strong>SEL=0のときは AND(A,B)、SEL=1のときは OR(A,B)</strong> を出力するんだよ。SEL信号が「どの演算をするか」を切り替えるスイッチになるんだね。' },
       { who:'rabbit', img:'rabbitThink', text:'真理値表を書いてみると……あれ、これって「3つの入力のうち2つ以上が1なら1」と同じ結果になりませんか？' },
