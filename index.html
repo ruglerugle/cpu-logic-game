@@ -162,6 +162,18 @@ text.label{fill:#162232;font-size:12px;font-weight:750;pointer-events:none;user-
 
 .btn-next{background:linear-gradient(#f5a623,#d4870a);border-color:#b87210;color:#fff;box-shadow:0 3px 0 #8a5508}
 .btn-next:hover{opacity:.9;background:linear-gradient(#f5a623,#d4870a)}
+#clear-screen{flex:1;overflow-y:auto;padding:24px 20px 40px;display:flex;flex-direction:column;gap:20px}
+.clear-hero{text-align:center;padding:16px 0 8px}
+.clear-badge{font-size:48px;line-height:1}
+.clear-title{font-size:26px;font-weight:900;color:#ffd54f;margin:8px 0 4px}
+.clear-sub{color:#a0b4c8;font-size:14px;margin:0}
+.clear-flow{background:#1a2a3a;border:1px solid #2d4a6a;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:10px}
+.flow-item{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.flow-item.wide{margin-top:4px}
+.flow-gate{background:#243550;border:1px solid #4a7aaa;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;color:#7ec8f0;white-space:nowrap}
+.flow-gate.muted{color:#7a9ab8;border-color:#3a5570}
+.flow-arrow{color:#5a8aaa;font-size:16px}
+.flow-result{margin-top:10px;padding:12px 16px;background:#1f3a20;border:1px solid #2d6a30;border-radius:8px;color:#7de87d;font-size:14px;text-align:center}
 /* Back to intro link */
 #backToIntroBtn{background:none;border:none;color:#1678c8;font-size:13px;font-weight:900;cursor:pointer;padding:4px 8px;display:flex;align-items:center;gap:4px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #backToIntroBtn:hover{text-decoration:underline}
@@ -290,6 +302,67 @@ circle.carrier{transition:cx 0.4s ease}
           <div id="msg"></div>
         </div>
       </div>
+
+      <!-- 全クリアまとめ画面 -->
+      <div id="clear-screen" style="display:none">
+        <div class="clear-hero">
+          <div class="clear-badge">🎉</div>
+          <h2 class="clear-title">全レベルクリア！</h2>
+          <p class="clear-sub">おめでとうございます。NANDゲートまで完走しました。</p>
+        </div>
+        <div class="dialog-scene">
+          <div class="dialog-row">
+            <img class="dialog-character" src="images/cat.png" alt="ねこ先生">
+            <div class="dialog-bubble">ここまで来たら、全部つながるよ。このゲームで作ってきたことを振り返ってみよう。</div>
+          </div>
+          <div class="dialog-row rabbit">
+            <div class="dialog-bubble">NOT・AND・OR・XOR……全部作りましたね。</div>
+            <img class="dialog-character" src="images/rabbit.png" alt="うさ美">
+          </div>
+          <div class="dialog-row">
+            <img class="dialog-character" src="images/catThink.png" alt="ねこ先生">
+            <div class="dialog-bubble">そして後半で、XORはAND・OR・NOTだけで作れることも示したね。</div>
+          </div>
+          <div class="dialog-row rabbit">
+            <div class="dialog-bubble">はい。<strong>AND(OR(A,B), NOT(AND(A,B)))</strong> でしたよね。</div>
+            <img class="dialog-character" src="images/rabbitThink.png" alt="うさ美">
+          </div>
+          <div class="dialog-row">
+            <img class="dialog-character" src="images/cat.png" alt="ねこ先生">
+            <div class="dialog-bubble">そしてNANDの章では、NOT・AND・ORの全部がNANDだけで作れることを確かめたね。</div>
+          </div>
+          <div class="dialog-row rabbit">
+            <div class="dialog-bubble">ということは……NOT・AND・OR → XOR も、全部NANDで作れる！</div>
+            <img class="dialog-character" src="images/rabbit.png" alt="うさ美">
+          </div>
+          <div class="dialog-row">
+            <img class="dialog-character" src="images/catThink.png" alt="ねこ先生">
+            <div class="dialog-bubble">その通り。まとめると——</div>
+          </div>
+        </div>
+        <div class="clear-flow">
+          <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">NOT</span></div>
+          <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">AND</span></div>
+          <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">OR</span></div>
+          <div class="flow-item"><span class="flow-gate muted">NOT+AND+OR</span><span class="flow-arrow">→</span><span class="flow-gate">XOR</span></div>
+          <div class="flow-item wide"><span class="flow-gate muted">NOT+AND+OR+XOR</span><span class="flow-arrow">→</span><span class="flow-gate">半加算器・全加算器・ALU</span></div>
+          <div class="flow-result">つまり <strong>NANDゲート1種類だけで CPU が作れる</strong></div>
+        </div>
+        <div class="dialog-scene">
+          <div class="dialog-row rabbit">
+            <div class="dialog-bubble">スイッチが2つあるだけのNANDが、CPUの計算全部を支えてるんですね……！</div>
+            <img class="dialog-character" src="images/rabbitThink.png" alt="うさ美">
+          </div>
+          <div class="dialog-row">
+            <img class="dialog-character" src="images/cat.png" alt="ねこ先生">
+            <div class="dialog-bubble">そう。何十億個ものNANDが積み重なって、いまあなたが使っているコンピュータになっているんだよ。</div>
+          </div>
+        </div>
+        <div class="intro-actions">
+          <button class="btn btn-p" onclick="loadLevel(0)">最初から遊ぶ</button>
+        </div>
+      </div>
+
     </main>
   </div>
 </div>
@@ -656,6 +729,7 @@ function startGame(){
 // ====================== レベルロード ======================
 function loadLevel(idx){
   if (idx !== undefined) currentLevelIdx = idx;
+  document.getElementById('clear-screen').style.display='none';
   const lv = LEVELS[currentLevelIdx];
   const total = LEVELS.length;
 
@@ -1195,10 +1269,16 @@ function showNextBtn(){
   const isLast=currentLevelIdx>=LEVELS.length-1;
   btn.textContent=isLast?'🎉 全レベルクリア！':'次のレベルへ →';
   btn.style.display='inline-flex';
-  btn.onclick=isLast?()=>alert('おめでとう！全7レベルクリアしました🎉'):goNextLevel;
+  btn.onclick=isLast?showClearScreen:goNextLevel;
 }
 function hideNextBtn(){
   document.getElementById('nextLevelBtn').style.display='none';
+}
+function showClearScreen(){
+  document.getElementById('game-screen').style.display='none';
+  document.getElementById('intro-screen').style.display='none';
+  document.getElementById('clear-screen').style.display='flex';
+  document.getElementById('app-shell').classList.remove('game-mode');
 }
 function goNextLevel(){
   if(currentLevelIdx<LEVELS.length-1){
