@@ -224,7 +224,7 @@ circle.carrier{transition:cx 0.4s ease}
     </div>
     <div>
       <div class="chapter-title">
-        <span id="head-level-title">レベル 1 / 8</span>
+        <span id="head-level-title">レベル 1 / 10</span>
         <span class="step-num" id="head-step">NOTゲート</span>
       </div>
       <div class="head-progress"><div class="head-progress-fill" id="prog"></div></div>
@@ -417,8 +417,44 @@ const LEVELS = [
     ],
   },
   {
-    name: "XORゲートを使う",
+    name: "ANDをNOT+ORで作る",
     label: "LEVEL 4",
+    shortName: "AND自作",
+    desc: "ANDゲートを使わずに、NOT・ORだけでANDと同じ動きを再現してください。",
+    cpuLink: "ド・モルガンの法則により、AND(A,B) = NOT(OR(NOT(A), NOT(B))) が成り立ちます。つまりANDとORはどちらか一方とNOTがあれば互いに再現できます。これがNANDゲート1種類だけで全回路を作れる「NANDの万能性」の根拠の一つです。",
+    hiddenGates: ["AND"],
+    inputs: ["A","B"],
+    outputs: ["OUT"],
+    truth: (A,B) => [ (A&&B)?1:0 ],
+    dialogue: [
+      { who:'rabbit', img:'rabbit', text:'ORゲートも覚えました！ところで、ANDやORって別の部品で作れたりしませんか？' },
+      { who:'cat', img:'cat', text:'いい質問だね。実はANDって、<strong>NOTとORだけで再現できる</strong>んだよ。' },
+      { who:'rabbit', img:'rabbitThink', text:'え？ANDをAND以外で？どういうことですか？' },
+      { who:'cat', img:'catThink', text:'「ド・モルガンの法則」というものがあって、<strong>AND(A,B) = NOT(OR(NOT(A), NOT(B)))</strong> が成り立つんだ。まずAとBをそれぞれNOTで反転して、それをORに通して、最後にもう一回NOTすると……ANDと同じ結果になるよ。' },
+      { who:'rabbit', img:'rabbit', text:'ということは、NOTとORさえあればANDを作れる……！回路ってそんな風に置き換えられるんですね。' },
+    ],
+  },
+  {
+    name: "ORをNOT+ANDで作る",
+    label: "LEVEL 5",
+    shortName: "OR自作",
+    desc: "ORゲートを使わずに、NOT・ANDだけでORと同じ動きを再現してください。",
+    cpuLink: "AND(A,B) = NOT(OR(NOT(A), NOT(B))) と同様に、OR(A,B) = NOT(AND(NOT(A), NOT(B))) も成り立ちます。この対称性がド・モルガンの法則の美しさです。NANDゲート（ANDの否定）はNOT・AND・OR・XORすべてを再現できる「万能ゲート」で、実際のCPUチップはほぼ全回路をNANDで実装しています。",
+    hiddenGates: ["OR"],
+    inputs: ["A","B"],
+    outputs: ["OUT"],
+    truth: (A,B) => [ (A||B)?1:0 ],
+    dialogue: [
+      { who:'rabbit', img:'rabbitThink', text:'ANDが作れたなら……ORも同じようにできますか？' },
+      { who:'cat', img:'cat', text:'もちろん！今度は逆で、<strong>OR(A,B) = NOT(AND(NOT(A), NOT(B)))</strong> になるんだよ。' },
+      { who:'rabbit', img:'rabbit', text:'A・BをNOTして、ANDして、もう一回NOT……！パターンが同じですね。' },
+      { who:'cat', img:'catThink', text:'これがド・モルガンの法則の対称性だよ。この2つを組み合わせると、<span class="blue">NANDゲート1種類だけで全部の回路が作れる</span>んだ。実際のCPUチップもほぼNANDだけで動いているんだよ。' },
+      { who:'rabbit', img:'rabbitThink', text:'たった1種類のゲートがCPUの全計算を支えてる……すごい！' },
+    ],
+  },
+  {
+    name: "XORゲートを使う",
+    label: "LEVEL 6",
     shortName: "XOR",
     desc: "A と B が異なるときだけ OUT が1になるようにしてください。",
     cpuLink: "XORは「2つの値が違うかどうか」を見分けます。実はこれが次のレベルで作る「足し算回路」の心臓部です。2進数の足し算で、桁の値が1+0や0+1のときに答えが1になるのはXORと同じ動きだからです。",
@@ -434,7 +470,7 @@ const LEVELS = [
   },
   {
     name: "XORをAND/OR/NOTで作る",
-    label: "LEVEL 5",
+    label: "LEVEL 7",
     shortName: "XOR自作",
     desc: "XORゲートを使わずに、AND・OR・NOTだけでXORと同じ動きを再現してください。",
     cpuLink: "実際のCPU内部でも、XORは複数のNANDゲートや基本ゲートの組み合わせで実装されています。「このゲートを別の部品で置き換えられるか？」と考える力が、回路設計の本質です。",
@@ -453,7 +489,7 @@ const LEVELS = [
   },
   {
     name: "半加算器（Half Adder）",
-    label: "LEVEL 6",
+    label: "LEVEL 8",
     shortName: "半加算器",
     desc: "A + B を2進数で計算してください。SUM=下位ビット, CARRY=桁上がり。\nヒント: SUM=XOR(A,B), CARRY=AND(A,B)",
     cpuLink: "これがCPUの「足し算」の最小単位です。CPUが 1+1 を計算するとき、人間が筆算で繰り上がりを考えるのと同じことを、このXORとANDの組み合わせ回路が一瞬でやっています。CPU内部のALU（算術論理演算装置）は、この回路をたくさん並べて作られています。",
@@ -469,7 +505,7 @@ const LEVELS = [
   },
   {
     name: "全加算器（Full Adder）",
-    label: "LEVEL 7",
+    label: "LEVEL 9",
     shortName: "全加算器",
     desc: "A, B, 前の桁からの桁上がり Cin を足し合わせ、SUM と Cout を出してください。CPUの足し算回路の基本単位です。",
     cpuLink: "1桁の足し算（半加算器）だけでは「前の桁からの繰り上がり」を扱えません。全加算器はCinを受け取れるようにした拡張版です。これを8個・32個・64個と横に並べてCoutを次のCinにつなげると、CPUは8bit/32bit/64bitの大きな数を一度に足し算できるようになります。",
@@ -485,7 +521,7 @@ const LEVELS = [
   },
   {
     name: "簡易ALU: AND/ORセレクタ",
-    label: "LEVEL 8",
+    label: "LEVEL 10",
     shortName: "ALU",
     desc: "SEL=0のときOUT=AND(A,B), SEL=1のときOUT=OR(A,B)。これはCPUのALUが演算を切り替える仕組みの基本形です。",
     cpuLink: "CPUの命令には「足し算しろ」「ANDを取れ」「比較しろ」など色々な種類があります。ALU（算術論理演算装置）はこれらの演算回路をすべて内部に持っていて、命令から来るSEL信号（制御信号）で「どの演算結果を出力するか」を切り替えています。これがCPUが命令ごとに違う計算をできる仕組みの正体です。",
@@ -884,12 +920,36 @@ const SOLUTIONS = [
     const g=addNode('OR',cx-36,100);
     wire(inp[0],g,0); wire(inp[1],g,1); wire(g,out[0]);
   },
-  // 3: XOR: A,B→XOR→OUT
+  // 3: AND自作: NOT(OR(NOT(A), NOT(B)))
+  (inp,out,cx)=>{
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.25, x2=inp[0].x+span*0.55, x3=inp[0].x+span*0.78;
+    const nt1=addNode('NOT',x1,60);
+    const nt2=addNode('NOT',x1,170);
+    const or =addNode('OR', x2,115);
+    const nt3=addNode('NOT',x3,115);
+    wire(inp[0],nt1); wire(inp[1],nt2);
+    wire(nt1,or,0); wire(nt2,or,1);
+    wire(or,nt3); wire(nt3,out[0]);
+  },
+  // 4: OR自作: NOT(AND(NOT(A), NOT(B)))
+  (inp,out,cx)=>{
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.25, x2=inp[0].x+span*0.55, x3=inp[0].x+span*0.78;
+    const nt1=addNode('NOT',x1,60);
+    const nt2=addNode('NOT',x1,170);
+    const an =addNode('AND',x2,115);
+    const nt3=addNode('NOT',x3,115);
+    wire(inp[0],nt1); wire(inp[1],nt2);
+    wire(nt1,an,0); wire(nt2,an,1);
+    wire(an,nt3); wire(nt3,out[0]);
+  },
+  // 5: XOR: A,B→XOR→OUT
   (inp,out,cx)=>{
     const g=addNode('XOR',cx-36,100);
     wire(inp[0],g,0); wire(inp[1],g,1); wire(g,out[0]);
   },
-  // 4: XOR自作: AND(OR(A,B), NOT(AND(A,B)))
+  // 6: XOR自作: AND(OR(A,B), NOT(AND(A,B)))
   (inp,out,cx)=>{
     const span=out[0].x-inp[0].x;
     const x1=inp[0].x+span*0.22, x2=inp[0].x+span*0.52, x3=inp[0].x+span*0.75;
