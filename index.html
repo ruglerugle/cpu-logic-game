@@ -1063,19 +1063,23 @@ const SOLUTIONS = [
     wire(an1,or,0); wire(an2,or,1);
     wire(or,out[1]);
   },
-  // 7: ALU: OR(AND(A,B), AND(XOR(A,B), SEL)) — 4ゲートの最小構成
+  // 7: ALU: OR(AND(A,B,NOT(SEL)), AND(OR(A,B),SEL)) — 6ゲートのナイーブ構成
   (inp,out,cx)=>{
     const span=out[0].x-inp[0].x;
-    const x1=inp[0].x+span*0.2, x2=inp[0].x+span*0.55, x3=inp[0].x+span*0.78;
-    const xr =addNode('XOR',x1,60);
-    const an1=addNode('AND',x1,180);
-    const an2=addNode('AND',x2,60);
-    const or =addNode('OR', x3,120);
-    wire(inp[0],xr,0);  wire(inp[1],xr,1);
-    wire(inp[0],an1,0); wire(inp[1],an1,1);
-    wire(xr,an2,0);     wire(inp[2],an2,1);
-    wire(an1,or,0);     wire(an2,or,1);
-    wire(or,out[0]);
+    const x1=inp[0].x+span*0.2, x2=inp[0].x+span*0.52, x3=inp[0].x+span*0.78;
+    const nsel =addNode('NOT',x1,40);
+    const an   =addNode('AND',x1,130);
+    const orab =addNode('OR', x1,220);
+    const and0 =addNode('AND',x2,85);
+    const and1 =addNode('AND',x2,175);
+    const outor=addNode('OR', x3,130);
+    wire(inp[2],nsel);
+    wire(inp[0],an,0);   wire(inp[1],an,1);
+    wire(inp[0],orab,0); wire(inp[1],orab,1);
+    wire(an,and0,0);     wire(nsel,and0,1);
+    wire(orab,and1,0);   wire(inp[2],and1,1);
+    wire(and0,outor,0);  wire(and1,outor,1);
+    wire(outor,out[0]);
   },
   // 10: NAND: A,B→NAND→OUT
   (inp,out,cx)=>{
