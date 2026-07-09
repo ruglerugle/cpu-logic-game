@@ -267,10 +267,23 @@ circle.carrier{transition:cx 0.4s ease}
         <div class="dialog-scene" id="dialog-scene"></div>
         <div id="cpu-link-area"></div>
         <div id="decompose-area"></div>
-        <div id="clear-flow-area"></div>
-        <div class="dialog-scene" id="dialog-scene-2" style="display:none"></div>
-        <div class="intro-actions" id="intro-actions">
+        <div class="intro-actions">
           <button class="btn btn-p" onclick="startGame()">⚡ 回路を組む</button>
+        </div>
+      </div>
+
+      <!-- 全クリアまとめ画面 -->
+      <div id="clear-screen" style="display:none">
+        <div>
+          <span class="ch-title">🎉 COMPLETE</span>
+          <span class="ch-heading">全レベルクリア！</span>
+        </div>
+        <p class="game-intro">おめでとうございます。NANDゲートまで完走しました。</p>
+        <div class="dialog-scene" id="clear-dialog-1"></div>
+        <div class="cpu-link-box" id="clear-flow-box"></div>
+        <div class="dialog-scene" id="clear-dialog-2"></div>
+        <div class="intro-actions">
+          <button class="btn btn-p" onclick="loadLevel(0)">最初から遊ぶ</button>
         </div>
       </div>
 
@@ -671,9 +684,7 @@ function startGame(){
 // ====================== レベルロード ======================
 function loadLevel(idx){
   if (idx !== undefined) currentLevelIdx = idx;
-  document.getElementById('clear-flow-area').innerHTML='';
-  document.getElementById('dialog-scene-2').style.display='none';
-  document.getElementById('intro-actions').innerHTML='<button class="btn btn-p" onclick="startGame()">⚡ 回路を組む</button>';
+  document.getElementById('clear-screen').style.display='none';
   const lv = LEVELS[currentLevelIdx];
   const total = LEVELS.length;
 
@@ -1241,27 +1252,16 @@ const CLEAR_DIALOGUE_2 = [
 
 function showClearScreen(){
   document.getElementById('game-screen').style.display='none';
+  document.getElementById('intro-screen').style.display='none';
   document.getElementById('app-shell').classList.remove('game-mode');
-  // intro-screen をそのまま流用してクリア画面を表示
-  document.getElementById('intro-label').textContent='🎉 COMPLETE';
-  document.getElementById('intro-title').textContent='全レベルクリア！';
-  document.getElementById('intro-desc').textContent='おめでとうございます。NANDゲートまで完走しました。';
-  document.getElementById('dialog-scene').innerHTML=renderDialogue(CLEAR_DIALOGUE_1);
-  document.getElementById('clear-flow-area').innerHTML=`<div class="clear-flow">
-    <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">NOT</span></div>
-    <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">AND</span></div>
-    <div class="flow-item"><span class="flow-gate">NAND</span><span class="flow-arrow">→</span><span class="flow-gate">OR</span></div>
-    <div class="flow-item"><span class="flow-gate muted">NOT+AND+OR</span><span class="flow-arrow">→</span><span class="flow-gate">XOR</span></div>
-    <div class="flow-item wide"><span class="flow-gate muted">NOT+AND+OR+XOR</span><span class="flow-arrow">→</span><span class="flow-gate">半加算器・全加算器・ALU</span></div>
-    <div class="flow-result">つまり <strong>NANDゲート1種類だけで CPU が作れる</strong></div>
-  </div>`;
-  const d2=document.getElementById('dialog-scene-2');
-  d2.innerHTML=renderDialogue(CLEAR_DIALOGUE_2);
-  d2.style.display='';
-  document.getElementById('cpu-link-area').innerHTML='';
-  document.getElementById('decompose-area').innerHTML='';
-  document.getElementById('intro-actions').innerHTML='<button class="btn btn-p" onclick="loadLevel(0)">最初から遊ぶ</button>';
-  document.getElementById('intro-screen').style.display='';
+  document.getElementById('clear-dialog-1').innerHTML=renderDialogue(CLEAR_DIALOGUE_1);
+  document.getElementById('clear-flow-box').innerHTML=
+    'NAND → NOT　/　NAND → AND　/　NAND → OR<br>' +
+    'NOT+AND+OR → XOR<br>' +
+    'NOT+AND+OR+XOR → 半加算器・全加算器・ALU<br>' +
+    '<strong>つまり、NANDゲート1種類だけで CPU が作れる</strong>';
+  document.getElementById('clear-dialog-2').innerHTML=renderDialogue(CLEAR_DIALOGUE_2);
+  document.getElementById('clear-screen').style.display='';
 }
 function goNextLevel(){
   if(currentLevelIdx<LEVELS.length-1){
