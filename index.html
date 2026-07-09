@@ -379,9 +379,9 @@ const LEVELS = [
     outputs: ["OUT"],
     truth: (A) => [ (A?0:1) ],
     dialogue: [
-      { who:'cat', img:'cat',    text:'ようこそ、論理回路CPUクエストへ。まず一番シンプルな回路から始めよう。その名も<strong>NOTゲート</strong>だ。' },
+      { who:'cat', img:'cat',    text:'ようこそ、論理回路CPUクエストへ！まず一番シンプルな回路から始めようか。その名も<strong>NOTゲート</strong>だよ。' },
       { who:'rabbit', img:'rabbit', text:'NOT……？否定、みたいな意味ですよね？' },
-      { who:'cat', img:'catThink', text:'そう。<strong>1を入れたら0が出て、0を入れたら1が出る</strong>。ただそれだけ。でもこの反転がCPUのすべての計算の土台になる。' },
+      { who:'cat', img:'catThink', text:'そうそう。<strong>1を入れたら0が出て、0を入れたら1が出る</strong>。ただそれだけだけど、この反転がCPUのすべての計算の土台になるんだよ。' },
       { who:'rabbit', img:'rabbitThink', text:'スイッチ1個で計算が始まるんですね。やってみます！' },
     ],
   },
@@ -396,9 +396,9 @@ const LEVELS = [
     truth: (A,B) => [ (A&&B)?1:0 ],
     dialogue: [
       { who:'rabbit', img:'rabbit', text:'NOTはクリアできました！次は何ですか？' },
-      { who:'cat', img:'cat', text:'<strong>ANDゲート</strong>だ。2つの入力が<strong>両方1のときだけ</strong>出力が1になる。' },
+      { who:'cat', img:'cat', text:'次は<strong>ANDゲート</strong>だよ。2つの入力が<strong>両方1のときだけ</strong>出力が1になるんだ。' },
       { who:'rabbit', img:'rabbitThink', text:'両方OKなら通過、みたいな感じ？関所みたいですね。' },
-      { who:'cat', img:'catThink', text:'いい例えだ。CPUが条件判定に使う基本回路で、セキュリティチェックのような役割を担っている。' },
+      { who:'cat', img:'catThink', text:'いい例えだね！CPUが条件判定に使う基本回路で、セキュリティチェックのような役割を担っているんだよ。' },
     ],
   },
   {
@@ -411,9 +411,9 @@ const LEVELS = [
     outputs: ["OUT"],
     truth: (A,B) => [ (A||B)?1:0 ],
     dialogue: [
-      { who:'cat', img:'cat', text:'今度は<strong>ORゲート</strong>。どちらか一方でも1なら出力が1になる。' },
+      { who:'cat', img:'cat', text:'今度は<strong>ORゲート</strong>だよ。どちらか一方でも1なら出力が1になるんだ。' },
       { who:'rabbit', img:'rabbit', text:'ANDとは逆の感じ！どっちかOKなら通過するんですね。' },
-      { who:'cat', img:'catThink', text:'そう。複数の信号のうちどれか1つが来たらCPUに知らせる、みたいな使い方をする。ANDとORを組み合わせると複雑な条件判定もできる。' },
+      { who:'cat', img:'catThink', text:'そうそう。複数の信号のうちどれか1つが来たらCPUに知らせる、みたいな使い方をするんだよ。ANDとORを組み合わせると複雑な条件判定もできるね。' },
     ],
   },
   {
@@ -427,9 +427,9 @@ const LEVELS = [
     truth: (A,B) => [ (A!==B)?1:0 ],
     dialogue: [
       { who:'rabbit', img:'rabbitThink', text:'XORって聞いたことないですが、どんなゲートですか？' },
-      { who:'cat', img:'cat', text:'2つの入力が<strong>「違う」ときだけ</strong>1を出す。0と1なら1、両方0か両方1なら0だ。' },
+      { who:'cat', img:'cat', text:'2つの入力が<strong>「違う」ときだけ</strong>1を出すんだよ。0と1なら1、両方0か両方1なら0だね。' },
       { who:'rabbit', img:'rabbit', text:'「違うときだけ」……面白い！ANDでもORでもない独特の動きですね。' },
-      { who:'cat', img:'catThink', text:'これが次のレベルで作る<span class="blue">足し算回路</span>の核心部になる。しっかり動きを確認しておこう。' },
+      { who:'cat', img:'catThink', text:'これが次のレベルで作る<span class="blue">足し算回路</span>の核心部になるんだよ。動きをよく確認しておいてね。' },
     ],
   },
   {
@@ -443,11 +443,11 @@ const LEVELS = [
     outputs: ["OUT"],
     truth: (A,B) => [ (A!==B)?1:0 ],
     dialogue: [
-      { who:'cat', img:'cat', text:'XORゲートの動きは覚えたな。では今度は<strong>XORゲートを使わずに</strong>、AND・OR・NOTだけで同じ動きを再現してみよう。' },
+      { who:'cat', img:'cat', text:'XORゲートの動き、バッチリだったね。では今度は<strong>XORゲートを使わずに</strong>、AND・OR・NOTだけで同じ動きを再現してみようか。' },
       { who:'rabbit', img:'rabbitThink', text:'XORをXOR以外で作る……？どうすればいいんでしょう。' },
-      { who:'cat', img:'catThink', text:'ヒント：XORとORの真理値表を比べてみろ。どこが違う？' },
+      { who:'cat', img:'catThink', text:'ヒント：XORとORの真理値表を比べてみて。どこが違うかな？' },
       { who:'rabbit', img:'rabbit', text:'A=1、B=1のときだけ違う！ORは1なのに、XORは0になる。「両方1のときだけORから除外する」感じですか？' },
-      { who:'cat', img:'cat', text:'完璧な気づきだ。「ORで1になる」かつ「ANDで1にならない」——つまり <strong>AND(OR(A,B), NOT(AND(A,B)))</strong> がXORと同じになる。ゲートは4つで済む。' },
+      { who:'cat', img:'cat', text:'完璧な気づきだよ！「ORで1になる」かつ「ANDで1にならない」——つまり <strong>AND(OR(A,B), NOT(AND(A,B)))</strong> がXORと同じになるんだ。ゲートは4つで済むよ。' },
       { who:'rabbit', img:'rabbitThink', text:'なるほど……「ORだけど両方1はダメ」を NOT(AND) で除外するんですね！' },
     ],
   },
@@ -461,9 +461,9 @@ const LEVELS = [
     outputs: ["SUM","CARRY"],
     truth: (A,B) => { return [A^B, A&B]; },
     dialogue: [
-      { who:'cat', img:'cat', text:'ここからが本番だ。<strong>半加算器</strong>——2進数の足し算回路を作ってみよう。' },
+      { who:'cat', img:'cat', text:'いよいよ面白くなってきたよ。<strong>半加算器</strong>——2進数の足し算回路を一緒に作ってみようか。' },
       { who:'rabbit', img:'rabbit', text:'足し算の回路！？ゲートだけで計算できるんですか？' },
-      { who:'cat', img:'catThink', text:'できる。XORで「足した値（SUM）」、ANDで「桁上がり（CARRY）」が出る。<span class="blue">たった2つのゲートで足し算が完成する</span>んだ。' },
+      { who:'cat', img:'catThink', text:'できるんだよ。XORで「足した値（SUM）」、ANDで「桁上がり（CARRY）」が出る。<span class="blue">たった2つのゲートで足し算が完成する</span>んだよ。' },
       { who:'rabbit', img:'rabbitThink', text:'そうか、1+1=10（2進数）だから、SUM=0でCARRY=1になるんですね！' },
     ],
   },
@@ -478,9 +478,9 @@ const LEVELS = [
     truth: (A,B,Cin) => { const t=A+B+Cin; return [t&1, t>>1]; },
     dialogue: [
       { who:'rabbit', img:'rabbit', text:'半加算器はできました！全加算器って何が違うんですか？' },
-      { who:'cat', img:'cat', text:'<strong>前の桁からの繰り上がり（Cin）</strong>を受け取れるようにした拡張版だ。' },
+      { who:'cat', img:'cat', text:'<strong>前の桁からの繰り上がり（Cin）</strong>を受け取れるようにした拡張版だよ。' },
       { who:'rabbit', img:'rabbitThink', text:'あ、筆算で「1繰り上げ」を次の桁に渡す感じ！' },
-      { who:'cat', img:'catThink', text:'正解。これを64個並べてCoutを次のCinにつなげると、64ビットの足し算ができる。それがCPUの加算器の正体だ。' },
+      { who:'cat', img:'catThink', text:'そう、まさにそれ！これを64個並べてCoutを次のCinにつなげると、64ビットの足し算ができるんだよ。それがCPUの加算器の正体なんだ。' },
     ],
   },
   {
@@ -493,15 +493,15 @@ const LEVELS = [
     outputs: ["OUT"],
     truth: (A,B,SEL) => { return [ SEL ? (A|B) : (A&B) ]; },
     dialogue: [
-      { who:'cat', img:'cat', text:'最後のレベルだ。<strong>ALU（算術論理演算装置）</strong>の基本形を作ろう。CPUの中で実際に計算を担当する部品だ。' },
+      { who:'cat', img:'cat', text:'いよいよ最後のレベルだよ。<strong>ALU（算術論理演算装置）</strong>の基本形を作ってみよう。CPUの中で実際に計算を担当する部品なんだ。' },
       { who:'rabbit', img:'rabbit', text:'ALUって……これまで作ってきたゲートが全部つながる感じですよね！で、どんな回路を組むんですか？' },
-      { who:'cat', img:'catThink', text:'入力は A・B・SEL の3本。<strong>SEL=0のときは AND(A,B)、SEL=1のときは OR(A,B)</strong> を出力する。SEL信号が「どの演算をするか」を命令するスイッチだ。' },
+      { who:'cat', img:'catThink', text:'入力は A・B・SEL の3本。<strong>SEL=0のときは AND(A,B)、SEL=1のときは OR(A,B)</strong> を出力するんだよ。SEL信号が「どの演算をするか」を切り替えるスイッチになるんだね。' },
       { who:'rabbit', img:'rabbitThink', text:'真理値表を書いてみると……あれ、これって「3つの入力のうち2つ以上が1なら1」と同じ結果になりませんか？' },
-      { who:'cat', img:'cat', text:'よく気づいた！その通り。これは<strong>多数決回路（Majority Gate）</strong>とも呼ばれる。同じ真理値表を持つ回路が複数の「意味」を持てる——それが論理回路の面白いところだ。' },
+      { who:'cat', img:'cat', text:'よく気づいたね！その通りだよ。これは<strong>多数決回路（Majority Gate）</strong>とも呼ばれるんだ。同じ真理値表を持つ回路が複数の「意味」を持てる——それが論理回路の面白いところだよ。' },
       { who:'rabbit', img:'rabbitThink', text:'ということは……A と B が違うとき（XOR=1）だけ SEL が結果を決める。A と B が同じときは SEL 関係なく AND の結果がそのまま出る。だったら <strong>OR(AND(A,B), AND(XOR(A,B), SEL))</strong> で4ゲートで書けませんか？' },
-      { who:'cat', img:'cat', text:'完璧だ！解答例の6ゲートより短い。XOR で「A と B が違うかどうか」を先に判定して、その情報を使って SEL を活かすかどうかを決める——これが論理回路の最適化だ。' },
+      { who:'cat', img:'cat', text:'完璧だよ！解答例の6ゲートより短くなったね。XOR で「A と B が違うかどうか」を先に判定して、その情報を使って SEL を活かすかどうかを決める——これが論理回路の最適化なんだ。' },
       { who:'rabbit', img:'rabbit', text:'「正解は1つじゃない」んですね。もっとシンプルな答えを探すのが設計の醍醐味か……！' },
-      { who:'cat', img:'catThink', text:'そう。CPUはこういう最適化を何十億回も積み重ねて作られている。スイッチだけで計算できる仕組みを、最初から最後まで自分の手で体験したことになるぞ。' },
+      { who:'cat', img:'catThink', text:'そうだよ。CPUはこういう最適化を何十億回も積み重ねて作られているんだ。スイッチだけで計算できる仕組みを、最初から最後まで自分の手で体験できたね。' },
     ],
   },
 ];
