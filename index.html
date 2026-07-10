@@ -556,6 +556,9 @@ const LEVELS = [
       { who:'cat', img:'cat', text:'<strong>前の桁からの繰り上がり（Cin）</strong>を受け取れるようにした拡張版だよ。' },
       { who:'rabbit', img:'rabbitThink', text:'あ、筆算で「1繰り上げ」を次の桁に渡す感じ！' },
       { who:'cat', img:'catThink', text:'そう、まさにそれ！これを64個並べてCoutを次のCinにつなげると、64ビットの足し算ができるんだよ。それがCPUの加算器の正体なんだ。' },
+      { who:'rabbit', img:'rabbit', text:'ところで、全加算器って半加算器を組み合わせて作れたりしますか？' },
+      { who:'cat', img:'cat', text:'よく気づいたね！実は<strong>半加算器2つ＋ORゲート1つ</strong>で全加算器が作れるんだよ。A・BをまずHAで足してSum1とCarry1を出して、次にSum1・CinをもうひとつのHAで足す。最後に2つのCarryをORでまとめたのがCoutになる。' },
+      { who:'rabbit', img:'rabbitHappy', text:'部品を再利用して大きな部品を作っていくんですね！' },
     ],
   },
   {
