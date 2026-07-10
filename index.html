@@ -891,16 +891,6 @@ function render(){
     label.setAttribute('x',w/2); label.setAttribute('y',h/2+5); label.setAttribute('text-anchor','middle');
     label.textContent=node.type==='INPUT'||node.type==='OUTPUT'?node.label:node.type;
     g.appendChild(label);
-    if (node.type==='HA'){
-      ['S','C'].forEach((lbl,i)=>{
-        const t=document.createElementNS("http://www.w3.org/2000/svg","text");
-        const pp=pinPos(getPin(node.outPins[i]));
-        t.setAttribute('x',w+14); t.setAttribute('y',pp.y-node.y+4);
-        t.setAttribute('fill','#378add'); t.setAttribute('font-size','11');
-        t.setAttribute('font-weight','bold');
-        t.textContent=lbl; g.appendChild(t);
-      });
-    }
     if (node.type!=='INPUT'&&node.type!=='OUTPUT'){
       const del=document.createElementNS("http://www.w3.org/2000/svg","text");
       del.setAttribute('x',w-5); del.setAttribute('y',13); del.setAttribute('text-anchor','end');
@@ -923,7 +913,15 @@ function render(){
       c.setAttribute('fill',isSelected?'#ffd54f':(pin.kind==='out'?'#378add':'#7a8da3'));
       c.setAttribute('stroke',isSelected?'#ffb700':'#5a7a99'); c.setAttribute('stroke-width',isSelected?'3':'2');
       svg.appendChild(c);
-    });
+      if (node.type==='HA'&&pin.kind==='out'){
+        const lbl=['S','C'][pin.index]||'';
+        const lt=document.createElementNS("http://www.w3.org/2000/svg","text");
+        lt.setAttribute('x',pos.x); lt.setAttribute('y',pos.y+4);
+        lt.setAttribute('text-anchor','middle'); lt.setAttribute('fill','#fff');
+        lt.setAttribute('font-size','10'); lt.setAttribute('font-weight','bold');
+        lt.setAttribute('pointer-events','none');
+        lt.textContent=lbl; svg.appendChild(lt);
+      }
   });
 }
 
