@@ -682,7 +682,7 @@ function showIntro(){
 function startGame(){
   document.getElementById('intro-screen').style.display = 'none';
   document.getElementById('game-screen').style.display = 'flex';
-  window.scrollTo({top:0, behavior:'smooth'});
+  window.scrollTo(0, 0);
   document.getElementById('app-shell').classList.add('game-mode');
   // hiddenGates: そのレベルで使用不可のゲートボタンを隠す
   // XOR はレベル6(index 5)以降、NAND はレベル11(index 10)以降に解放
