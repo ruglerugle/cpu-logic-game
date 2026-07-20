@@ -61,7 +61,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 .header-actions{display:flex;align-items:center;gap:10px}
 .head-btn{height:50px;padding:0 18px;border:2px solid rgba(255,255,255,.78);border-radius:9px;background:rgba(0,0,0,.18);color:#fff;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.26);touch-action:manipulation}
 .head-btn:hover{background:rgba(255,255,255,.15)}
-a.head-btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+a.head-btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.head-btn.home-badge{width:44px;height:44px;padding:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(79,209,197,.5),rgba(10,20,20,1) 75%);border:2px solid #4fd1c5;box-shadow:0 0 0 3px rgba(0,0,0,.25),0 0 10px -2px #4fd1c5;font-size:20px}.head-btn.home-badge:hover{box-shadow:0 0 0 3px rgba(0,0,0,.25),0 0 16px 0 #4fd1c5;transform:translateY(-2px) scale(1.07)}
 
 /* ── Layout ── */
 .game-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;flex:1;min-height:0;transition:grid-template-columns .25s ease}
@@ -259,7 +259,7 @@ circle.carrier{transition:cx 0.4s ease}
       <div class="head-progress"><div class="head-progress-fill" id="prog"></div></div>
     </div>
     <div class="header-actions">
-      <a class="head-btn" href="https://ruglerugle.github.io/" title="クエスト集トップへ">🗺️ トップへ</a>
+      <a class="head-btn home-badge" href="https://ruglerugle.github.io/" title="クエスト集トップへ" aria-label="クエスト集トップへ">🧭</a>
       <button class="head-btn" onclick="toggleSidebar()">☰ ナビ</button>
     </div>
   </header>
