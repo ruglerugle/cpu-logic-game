@@ -116,6 +116,12 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:li
 .ch-heading{display:inline;font-size:20px;font-weight:950;color:#172235}
 .game-intro{border-top:1px solid #c9d2da;padding-top:9px;margin-top:8px;font-size:15px;color:#172235;line-height:1.7;font-weight:780}
 .cpu-link-box{background:#eef8f5;border:1px solid #97c9bd;border-left:4px solid #1aa65d;border-radius:6px;padding:10px 13px;font-size:13px;color:#174432;margin:12px 0;line-height:1.7;font-weight:780}
+.book-recommend-box{margin:12px 0;background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;box-shadow:var(--shadow)}
+.book-recommend-label{display:inline-block;font-size:10px;font-weight:900;color:#888;border:1px solid #aaa;border-radius:4px;padding:0 4px;margin:0 0 6px}
+.book-recommend-body{display:flex;align-items:center;gap:12px}
+.book-recommend-cover{width:60px;height:auto;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.3);flex-shrink:0}
+.book-recommend-lead{font-size:12px;color:#888;margin:0 0 4px;font-weight:700}
+.book-recommend-box a{font-size:13px;font-weight:900;text-decoration:underline;color:var(--ink)}
 .cpu-link-box strong{color:#0b3d25}
 .zoom-btn{display:inline-block;margin-top:8px;padding:7px 12px;background:#f0e8ff;border:1px solid #c5a9f5;border-radius:6px;color:#5b35c4;cursor:pointer;font-size:13px;font-weight:900;touch-action:manipulation}
 .zoom-btn:hover{background:#e4d5ff}
@@ -277,6 +283,18 @@ circle.carrier{transition:cx 0.4s ease}
         <div class="dialog-scene" id="dialog-scene"></div>
         <div id="cpu-link-area"></div>
         <div id="decompose-area"></div>
+        <div class="book-recommend-box">
+          <p class="book-recommend-label">参考文献</p>
+          <div class="book-recommend-body">
+            <a href="https://www.amazon.co.jp/dp/4873117127?tag=senjin-22" target="_blank" rel="sponsored noopener">
+              <img src="https://m.media-amazon.com/images/I/91WtnIHXuxL._SY342_.jpg" alt="コンピュータシステムの理論と実装" class="book-recommend-cover">
+            </a>
+            <div>
+              <p class="book-recommend-lead">もっと深く学びたい方へ</p>
+              <a href="https://www.amazon.co.jp/dp/4873117127?tag=senjin-22" target="_blank" rel="sponsored noopener">ノーム・ニッサン, シモン・ショッケン『コンピュータシステムの理論と実装』</a>
+            </div>
+          </div>
+        </div>
         <div class="intro-actions">
           <button class="btn btn-p" onclick="startGame()">⚡ 回路を組む</button>
         </div>
