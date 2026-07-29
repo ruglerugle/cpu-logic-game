@@ -1284,7 +1284,7 @@ function renderDialogue(dialogue){
     const isRabbit = d.who === 'rabbit';
     return `<div class="dialog-row${isRabbit?' right':''}">
       <div class="dialog-character">
-        <img src="images/${d.img}.png" alt="${isRabbit?'うさ美':'ねこ先生'}">
+        <img src="/images/${d.img}.png" alt="${isRabbit?'うさ美':'ねこ先生'}">
         <div class="dialog-name ${d.who}">${isRabbit?'うさ美':'ねこ先生'}</div>
       </div>
       <div class="dialog-bubble">${d.text}</div>
