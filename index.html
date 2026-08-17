@@ -337,7 +337,7 @@ circle.carrier{transition:cx 0.4s ease}
           <span class="ch-title">🎉 COMPLETE</span>
           <span class="ch-heading">全レベルクリア！</span>
         </div>
-        <p class="game-intro">おめでとうございます。NANDゲートまで完走しました。</p>
+        <p class="game-intro">おめでとうございます。NOTゲート1個から始めて、本物の足し算回路まで完走しました。</p>
         <div class="dialog-scene" id="clear-dialog-1"></div>
         <div class="cpu-link-box" id="clear-flow-box"></div>
         <div class="dialog-scene" id="clear-dialog-2"></div>
@@ -705,6 +705,22 @@ const LEVELS = [
       { who:'rabbit', img:'rabbit', text:'NANDゲートが積み重なって、最終的にCPUになってるんですね……なんかすごい！' },
     ],
   },
+  {
+    name: "ついに計算：2ビットの足し算",
+    label: "LEVEL 15",
+    shortName: "2bit加算器",
+    desc: "総仕上げ。2ビットの数 A(A1 A0) と B(B1 B0) を足して、3ビットの答え S2 S1 S0 を出してください。例: A=10(=2) + B=11(=3) → 101(=5)。\nヒント: 下の桁は半加算器1個。上の桁は半加算器2個＋ORで「繰り上がりも足せる回路」になる（全加算器の考え方）。",
+    cpuLink: "これが「CPUが計算する」の正体です。いま作った回路を32個・64個と横に並べたものが、実際のCPUのALUの中で毎秒何十億回も動いています。NOTゲート1個から始めて、本物の計算回路を設計できるところまで来ました。",
+    inputs: ["A1","A0","B1","B0"],
+    outputs: ["S2","S1","S0"],
+    truth: (A1,A0,B1,B0) => { const t=(A1*2+A0)+(B1*2+B0); return [(t>>2)&1,(t>>1)&1,t&1]; },
+    dialogue: [
+      { who:'cat', img:'cat', text:'いよいよ最後のレベルだよ。今まで作ってきた部品で、<strong>本物の足し算</strong>——2ビットどうしの計算をやってみよう。' },
+      { who:'rabbit', img:'rabbitThink', text:'2ビットどうし…つまり「2+3」みたいな計算を、ゲートだけでやるんですね！' },
+      { who:'cat', img:'catThink', text:'そう。下の桁は半加算器そのまま。上の桁は<span class="blue">前の桁からの繰り上がり</span>も足す必要があるから、半加算器2個とORで組み立てる。全加算器のレベルでやった考え方だね。' },
+      { who:'rabbit', img:'rabbit', text:'筆算の繰り上がりと同じですね…！やってみます！' },
+    ],
+  },
 ];
 
 // ====================== 状態 ======================
@@ -744,7 +760,7 @@ function startGame(){
     const gate = btn.dataset.gate;
     const locked = (gate === 'XOR' && currentLevelIdx < 5)
                 || (gate === 'NAND' && currentLevelIdx < 10)
-                || (gate === 'HA' && currentLevelIdx !== 8);
+                || (gate === 'HA' && currentLevelIdx !== 8 && currentLevelIdx !== 14);
     btn.style.display = (hidden.includes(gate) || locked) ? 'none' : '';
   });
   resetCircuit();
@@ -813,7 +829,8 @@ function resetCircuit(){
   const level = LEVELS[currentLevelIdx];
   const w = svg.clientWidth || 800;
   const outX = Math.max(w - 100, 200);
-  level.inputs.forEach((name, i) => addNode('INPUT', 40, 60 + i*90, {label:name}));
+  const inDy = level.inputs.length >= 4 ? 70 : 90;
+  level.inputs.forEach((name, i) => addNode('INPUT', 40, 50 + i*inDy, {label:name}));
   level.outputs.forEach((name, i) => addNode('OUTPUT', outX, 60 + i*90, {label:name}));
   render();
 }
@@ -1222,6 +1239,23 @@ const SOLUTIONS = [
     wire(na,or,0); wire(nb,or,1);
     wire(or,out[0]);
   },
+  // 14: 2bit加算器: HA(A0,B0)→S0/c0, HA(A1,B1)→s/c1, HA(s,c0)→S1/c2, OR(c1,c2)→S2
+  (inp,out,cx)=>{
+    const span=out[0].x-inp[0].x;
+    const x1=inp[0].x+span*0.32, x2=inp[0].x+span*0.64;
+    const ha0=addNode('HA',x1,225);
+    const ha1=addNode('HA',x1,55);
+    const ha2=addNode('HA',x2,140);
+    const or =addNode('OR',x2,35);
+    const w=(n,oi,t,ti)=>wires.push({id:uid(),fromPin:n.outPins[oi],toPin:t.inPins[ti]});
+    wire(inp[1],ha0,0); wire(inp[3],ha0,1);
+    wire(inp[0],ha1,0); wire(inp[2],ha1,1);
+    w(ha1,0,ha2,0); w(ha0,1,ha2,1);
+    w(ha0,0,out[2],0);
+    w(ha2,0,out[1],0);
+    w(ha1,1,or,0); w(ha2,1,or,1);
+    wire(or,out[0]);
+  },
 ];
 
 // ノードのoutPins[0]→別ノードのinPins[toIdx] をつなぐ
@@ -1337,6 +1371,8 @@ const CLEAR_DIALOGUE_1 = [
 const CLEAR_DIALOGUE_2 = [
   { who:'rabbit', img:'rabbitThink',text:'スイッチが2つあるだけのNANDが、CPUの計算全部を支えてるんですね……！' },
   { who:'cat',    img:'cat',        text:'そう。何十億個ものNANDが積み重なって、いまあなたが使っているコンピュータになっているんだよ。' },
+  { who:'rabbit', img:'rabbit',     text:'しかも最後は、自分で組んだ回路で本当に足し算ができました！' },
+  { who:'cat',    img:'catThink',   text:'あれがCPUの計算の正体。君はもう、コンピュータの心臓部を自分の手で組める。おつかれさま！' },
 ];
 
 function showClearScreen(){
@@ -1348,6 +1384,7 @@ function showClearScreen(){
     'NAND → NOT　/　NAND → AND　/　NAND → OR<br>' +
     'NOT+AND+OR → XOR<br>' +
     'NOT+AND+OR+XOR → 半加算器・全加算器・ALU<br>' +
+    '半加算器×3 + OR → 2ビット加算器（本物の計算！）<br>' +
     '<strong>つまり、NANDゲート1種類だけで CPU が作れる</strong>' +
     '<hr style="margin:12px 0;border-color:rgba(255,255,255,.2)">' +
     '<small>実際のCPUもトランジスタ2〜3個でNANDを構成し、それを何十億個も組み合わせて作られています。' +
