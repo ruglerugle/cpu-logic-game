@@ -268,6 +268,11 @@ circle.carrier{transition:cx 0.4s ease}
   .dialog-row.right .dialog-bubble::after{left:-8px;right:auto;border-left:0;border-right:9px solid #fff}
   .main-area{min-height:0}
 }
+
+/* ===== クリア画面のリンク ===== */
+.ending-links{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px}
+.ending-link{display:inline-block;padding:10px 18px;border-radius:9px;font-weight:900;font-size:14px;text-decoration:none;border:1px solid var(--bd);background:var(--s1);color:var(--ink)}
+.ending-link.share{background:#111;border-color:#222;color:#fff}
 </style>
 </head>
 <body>
@@ -338,6 +343,10 @@ circle.carrier{transition:cx 0.4s ease}
         <div class="dialog-scene" id="clear-dialog-2"></div>
         <div class="intro-actions">
           <button class="btn btn-p" onclick="loadLevel(0)">最初から遊ぶ</button>
+        </div>
+        <div class="ending-links">
+          <a class="ending-link share" href="https://x.com/intent/post?text=%E8%AB%96%E7%90%86%E5%9B%9E%E8%B7%AFCPU%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%20%E5%85%A8%E3%83%AC%E3%83%99%E3%83%AB%E3%82%AF%E3%83%AA%E3%82%A2%EF%BC%81%E2%9A%A1%20%E8%AB%96%E7%90%86%E3%82%B2%E3%83%BC%E3%83%88%E3%82%92%E7%B5%84%E3%82%93%E3%81%A7CPU%E3%81%AE%E4%BB%95%E7%B5%84%E3%81%BF%E3%82%92%E5%AD%A6%E3%81%B9%E3%82%8B%E7%84%A1%E6%96%99%E5%AD%A6%E7%BF%92%E3%82%B2%E3%83%BC%E3%83%A0&url=https%3A%2F%2Finformatics.habatakijuku.com%2Fcpu-logic-game%2F" target="_blank" rel="noopener">𝕏 クリアを報告する</a>
+          <a class="ending-link" href="/">🧭 他のクエストも遊ぶ</a>
         </div>
       </div>
 
