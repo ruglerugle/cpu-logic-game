@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2733">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE3 ANDとOR ― 論理回路CPUクエスト</title>
+<meta name="description" content="入力が2本ある論理ゲート AND（かつ）と OR（または）。スイッチの直列・並列から意味をつかみ、真理値表で動きを確かめ、3入力の AND や「警報装置」の回路を自分で組む。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/cpu-logic-game/stage3">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="論理回路CPUクエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE3 ANDとOR ― 論理回路CPUクエスト">
+<meta property="og:description" content="「かつ」と「または」を電気でやる。AND と OR を真理値表と回路で確かめる。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/cpu-logic-game/stage3">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/cpu-logic-game.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108c">
+<link rel="stylesheet" href="circuit.css?v=20261108c">
+<script src="js/stages.js?v=20261108c"></script>
+<script src="js/progress.js?v=20261108c"></script>
+<script src="js/circuit.js?v=20261108c"></script>
+<script src="js/labs.js?v=20261108c"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">⚡</a> <span>論理回路CPUクエスト</span></div>
+      <div class="brand-sub">STAGE 3 ― ANDとOR ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 10</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 3</span><h1 class="chapter-title">ANDとOR</h1>
+        <div class="chapter-sub">真理値表で考える</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">AND と OR の意味を真理値表で説明できるようになろう。AND・OR・3入力の AND・警報装置の4つの回路の課題を解き、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">NOT は入力が1本だった。今日は入力が2本ある論理ゲートを2つ作る。きみは理科で、豆電球とスイッチ2個の回路を作ったことがあるかな。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">あります。スイッチを2個<strong>直列</strong>につなぐと、両方を入れたときだけ電球がつきます。<strong>並列</strong>につなぐと、どちらか1つを入れればつきます。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">その2つが、今日の2つの論理ゲートの考え方そのものなんだ。スイッチを入れる＝1、電球がつく＝1 と読むと、直列は「A が1 <strong>かつ</strong> B が1 のときだけ 1」、並列は「A が1 <strong>または</strong> B が1 なら 1」になる。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">「かつ」と「または」。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">英語で「かつ」は and、「または」は or。だから、前者を <strong>AND</strong>（アンド）ゲート、後者を <strong>OR</strong>（オア）ゲートと呼ぶ。トランジスタも、直列につなげば「両方が通すときだけ通る」、並列につなげば「どちらかが通せば通る」になる。実際の CMOS でどう組むかは少し工夫が要って、それは NAND の回で見よう。今日は箱として扱う。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">入力が2本だと、入力の組み合わせは何通りあるかな。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">2ビットだから 2×2＝4通りです。00、01、10、11。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。真理値表は4行になる。AND と OR を並べて書いてごらん。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> AND は 11 の行だけ 1、ほかは 0。OR は 00 の行だけ 0、ほかは 1 です。</div>
+        </div>
+      </div>
+      <table class="tt"><tr><th>A</th><th>B</th><th>AND</th><th>OR</th></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td class="hl">1</td><td>1</td></tr></table>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ここで1つ、言葉の注意をしておこう。日本語で「コーヒーまたは紅茶をどうぞ」と言われたら、両方もらうのはなんだか気が引けるよね。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">ふつうは「どちらか1つ」という意味に聞こえます。……でも OR の表では、11 の行も 1 になっています。両方 1 でも OK なんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。論理ゲートの OR は「<strong>少なくとも1つ</strong>が1なら1」。両方1でも1だ。「どちらか一方だけ」を表す別のゲートもあって、それは STAGE5 で作る。今日の OR は「両方でもいい」ほうだと覚えておいて。</div>
+        </div>
+      </div>
+      <div class="cp" id="pz-s3-and"></div>
+      <div class="cp" id="pz-s3-or"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">AND は「全部そろったら」、OR は「1つでもあれば」ですね。CPU の中では、どんなところで使うんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">たとえば、CPU が記憶装置に値を書き込むのは、「書き込みの命令が来ている」<strong>かつ</strong>「書き込む場所の番号が自分と一致している」ときだけだ。どちらか片方だけで書き込んだら、関係ない場所のデータを壊してしまう。逆に「計算でエラーが起きた」<strong>または</strong>「外から緊急の知らせが来た」ら、いまの作業を止める、という判断には OR を使う。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">入力が3本になったら、どうするんですか？ 「A かつ B かつ C」とか。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">2本用の AND を2つ使えばいい。どうつなげばいいと思う？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> まず A と B を AND に入れると、「A かつ B」が出てくる。それをもう1つの AND の片方に入れて、もう片方に C を入れれば、「(A かつ B) かつ C」。3つ全部が1のときだけ1になります。</div>
+        </div>
+      </div>
+      <div class="cp" id="pz-s3-and3"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。入力が3本だと組み合わせは 2×2×2＝8通りで、真理値表は8行になる。そのうち1になるのは 111 の1行だけだ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">最後に、AND と OR を混ぜて、意味のある回路を作ってみよう。家の警報装置だ。入力は3本。<strong>D</strong>＝ドアが開いた、<strong>S</strong>＝警報をセットしてある、<strong>E</strong>＝非常ボタンが押された。ベル <strong>OUT</strong> が鳴るのは、「警報をセットしてあって、ドアが開いた」とき。それから、非常ボタンが押されたら、セットしていなくても必ず鳴る。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 「D かつ S」で1つ目の条件。それと E の「または」。だから、D と S を AND に入れて、その出力と E を OR に入れれば、ベルの回路になります。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">警報のベル OUT ＝ ( D AND S ) OR E</span>
+        <span class="step">かっこの中を先に計算する。D＝1、S＝0、E＝0 なら、D AND S＝0、0 OR 0＝0 で鳴らない</span>
+      </div>
+      <div class="cp" id="pz-s3-alarm"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">言葉で書いた条件を「かつ」「または」に分けたら、そのまま回路になりました。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そこが論理回路の強みなんだ。どんな「もし〜なら」の判断も、条件を「かつ・または・でない」に分解できれば、ゲートの組み合わせとして作れる。ただ、同じ判断を作る組み方は1通りではない。次のステージでは、ある部品を別の部品だけで作り直す方法を考えよう。</div>
+        </div>
+      </div>
+      <script>
+      CircuitPuzzle.mount(document.getElementById("pz-s3-and"), {
+        id: "cpu-s3-and", title: "AND（かつ）",
+        desc: "A と B が両方 1 のときだけ OUT が 1 になる回路を作ろう。",
+        inputs: ["A", "B"], outputs: ["OUT"], gates: ["AND"], height: 220,
+        truth: function (A, B) { return [A && B ? 1 : 0]; },
+        solution: function (k) { var g = k.add("AND", 0.45, 0.5); k.wire(k.inp[0], g, 0); k.wire(k.inp[1], g, 1); k.wire(g, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s3-or"), {
+        id: "cpu-s3-or", title: "OR（または）",
+        desc: "A と B の少なくとも1つが 1 なら OUT が 1 になる回路を作ろう。",
+        inputs: ["A", "B"], outputs: ["OUT"], gates: ["OR"], height: 220,
+        truth: function (A, B) { return [A || B ? 1 : 0]; },
+        solution: function (k) { var g = k.add("OR", 0.45, 0.5); k.wire(k.inp[0], g, 0); k.wire(k.inp[1], g, 1); k.wire(g, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s3-and3"), {
+        id: "cpu-s3-and3", title: "3入力の AND",
+        desc: "A・B・C が3つとも 1 のときだけ OUT が 1 になる回路を、2入力の AND を組み合わせて作ろう。",
+        inputs: ["A", "B", "C"], outputs: ["OUT"], gates: ["AND"],
+        truth: function (A, B, C) { return [A && B && C ? 1 : 0]; },
+        solution: function (k) { var g1 = k.add("AND", 0.3, 0.3), g2 = k.add("AND", 0.6, 0.5); k.wire(k.inp[0], g1, 0); k.wire(k.inp[1], g1, 1); k.wire(g1, g2, 0); k.wire(k.inp[2], g2, 1); k.wire(g2, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s3-alarm"), {
+        id: "cpu-s3-alarm", title: "警報装置",
+        desc: "D＝ドアが開いた、S＝警報をセット中、E＝非常ボタン。OUT（ベル）＝ (D AND S) OR E を作ろう。",
+        inputs: ["D", "S", "E"], outputs: ["OUT"], gates: ["AND", "OR"],
+        truth: function (D, S, E) { return [(D && S) || E ? 1 : 0]; },
+        solution: function (k) { var g1 = k.add("AND", 0.3, 0.3), g2 = k.add("OR", 0.6, 0.5); k.wire(k.inp[0], g1, 0); k.wire(k.inp[1], g1, 1); k.wire(g1, g2, 0); k.wire(k.inp[2], g2, 1); k.wire(g2, k.out[0]); }
+      });
+      </script>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. OR ゲートに A＝1、B＝1 を入れると、出力は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">0（「どちらか一方だけ」なので、両方1は当てはまらない）</button>
+          <button class="choice-btn">1（少なくとも1つが1なら1）</button>
+          <button class="choice-btn">決まらない</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 論理ゲートの OR は「少なくとも1つが1なら1」。両方1でも1になる。「どちらか一方だけ」を表すのは STAGE5 の XOR。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. 3入力の AND（A かつ B かつ C）の真理値表で、出力が 1 になる行はいくつ？</p>
+        <div class="choice-list">
+          <button class="choice-btn">8行のうち1行（111 の行だけ）</button>
+          <button class="choice-btn">8行のうち3行</button>
+          <button class="choice-btn">6行のうち1行</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 入力3本の組み合わせは 2×2×2＝8通り。全部そろうのは 111 の1通りだけ。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. 警報装置 OUT＝(D AND S) OR E で、ドアが開き（D＝1）、警報はセットしておらず（S＝0）、非常ボタンも押していない（E＝0）とき、ベルは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">鳴る（ドアが開いたから）</button>
+          <button class="choice-btn">非常ボタンを押したことになる</button>
+          <button class="choice-btn">鳴らない（D AND S＝0、0 OR 0＝0）</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ かっこの中を先に計算する。S＝0 なので D AND S＝0、E も 0 なので OR の結果も 0。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage2.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(3);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

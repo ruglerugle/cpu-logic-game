@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2733">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>全ステージクリア ― 論理回路CPUクエスト</title>
+<meta name="description" content="コンピュータの中にあるのは「電気を通す・通さない」のスイッチだけ。2進数、トランジスタ、論理ゲート（NOT・AND・OR・XOR・NAND）、足し算・引き算の回路、ALU、覚える回路、そして命令を1つずつこなす CPU まで、回路を自分で組みながら確かめる全10ステージの無料学習サイト。ねこ博士とうさ美が案内します。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/cpu-logic-game/complete">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="論理回路CPUクエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="全ステージクリア ― 論理回路CPUクエスト">
+<meta property="og:description" content="スイッチしか無いのに、どうして計算できるのか。2進数から CPU の1サイクルまで、回路を自分で組んで確かめる全10ステージ。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/cpu-logic-game/complete">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/cpu-logic-game.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108c">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<div class="shell">
+  <nav class="topbar" aria-label="サイト情報">
+    <span class="brand-badge" aria-hidden="true">⚡</span>
+    <span class="brand-copy">
+      <strong>論理回路CPUクエスト</strong>
+      <small>LOGIC CIRCUIT CPU QUEST</small>
+    </span>
+    <a class="head-reset" style="margin-left:auto" href="/" title="情報の冒険（シリーズの地図）へ">🧭 シリーズの地図</a>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <h1><span class="line">スイッチから CPU まで、組み上げた ∎</span></h1>
+      <p>0と1しか無い世界で、数を表し（2進数）、電気でスイッチを切り替え（トランジスタ）、判断し（論理ゲート）、足し引きし（加算器と2の補数）、選び（マルチプレクサ）、覚え（ラッチとクロック）、命令を順番にこなす（CPU の1サイクル）。最初の問い「スイッチしか無いのに、なぜ計算できるのか」への答えを、きみはもう全部自分の手で組んだ。旅の記録で振り返ろう。</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="board" aria-labelledby="recap-heading">
+      <div class="board-head">
+        <div><h2 id="recap-heading">ここまでの旅を振り返ろう</h2></div>
+        <p>全10ステージ、おつかれさま</p>
+      </div>
+      <div class="recap-list">
+        <div class="recap-item">
+          <div class="recap-num">1</div>
+          <div class="recap-body">
+            <div class="recap-title">2進数</div>
+            <div class="recap-desc">使える数字が2種類なら、2ごとに繰り上がる。位の重みは 1, 2, 4, 8…。nビットで2をn回掛けた数だけ表せ、8ビット＝1バイト、4ビットずつ16進数1文字。2段階にするのは揺れに強いから。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">2</div>
+          <div class="recap-body">
+            <div class="recap-title">トランジスタとNOT</div>
+            <div class="recap-desc">ゲート電極のプラスに電子が引き寄せられ、絶縁膜の下に通り道ができる（電界効果）。nMOS と pMOS を上下に組んだ CMOS の NOT は、どちらかが必ず切れているので電気をほとんど使わない。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">3</div>
+          <div class="recap-body">
+            <div class="recap-title">ANDとOR</div>
+            <div class="recap-desc">AND は全部そろったら1、OR は少なくとも1つで1（両方1でも1）。言葉の条件を「かつ・または・でない」に分ければ、そのままゲートの組み合わせになる。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">4</div>
+          <div class="recap-body">
+            <div class="recap-title">ド・モルガンの法則</div>
+            <div class="recap-desc">NOT(A AND B)＝(NOT A) OR (NOT B)、NOT(A OR B)＝(NOT A) AND (NOT B)。否定すると「かつ」と「または」が入れ替わる。部品は別の部品で作り直せる。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">5</div>
+          <div class="recap-body">
+            <div class="recap-title">XOR</div>
+            <div class="recap-desc">XOR は違うときだけ1。(A OR B) AND NOT(A AND B) で作れる。NOT XOR は「同じか」の判定器で、桁ごとに調べて AND すれば数の一致が分かる。1桁の足し算の1の位も XOR。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">6</div>
+          <div class="recap-body">
+            <div class="recap-title">NANDだけで全部作れる</div>
+            <div class="recap-desc">nMOS の直列＋pMOS の並列で NAND（4個）。NAND(A,A)＝NOT、NAND を2回で AND、ド・モルガンで OR。NAND だけでどんな回路も作れる（実際の CPU はほかの部品も使い分ける）。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">7</div>
+          <div class="recap-body">
+            <div class="recap-title">足し算する回路</div>
+            <div class="recap-desc">半加算器＝XOR と AND。全加算器は半加算器2個と OR（2つの繰り上がりは同時に1にならない）。並べて繰り上がりを手渡せば何ビットでも足せる。速くするには桁上げ先読み。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">8</div>
+          <div class="recap-body">
+            <div class="recap-title">桁あふれとマイナスの数</div>
+            <div class="recap-desc">桁あふれで数は輪になる。−x＝NOT x＋1（x＋NOT x＝1111＝−1 だから）。B を SUB と XOR し、一番右の桁に SUB を足せば、同じ回路が A＋B と A−B を切り替える。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">9</div>
+          <div class="recap-body">
+            <div class="recap-title">選ぶ回路とALU</div>
+            <div class="recap-desc">マルチプレクサ＝(A AND NOT SEL) OR (B AND SEL)。nビットの選択信号で2のn乗個から選べる。ALU は全部計算して1つ選び、ゼロフラグや桁あふれのフラグも出す。比較は引き算とフラグで。</div>
+          </div>
+        </div>
+        <div class="recap-item">
+          <div class="recap-num">10</div>
+          <div class="recap-body">
+            <div class="recap-title">覚える回路とCPU</div>
+            <div class="recap-desc">フィードバックの輪で値が残る（ラッチ）。クロックの瞬間だけ取り込むので途中の答えを拾わない。CPU は PC の指す命令を取り出し・解読・実行し、フラグを見て PC を書き換えて分岐やくり返しをする。</div>
+          </div>
+        </div>
+      </div>
+      <div class="complete-actions">
+        <a class="btn btn-primary" href="/memory-quest/">次の旅へ：メモリのしくみクエスト →</a>
+        <a class="btn" href="./">トップへ戻る</a>
+        <a class="btn" href="https://x.com/intent/post?text=%E8%AB%96%E7%90%86%E5%9B%9E%E8%B7%AFCPU%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%E3%82%92%E5%85%A810%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%82%AF%E3%83%AA%E3%82%A2%E3%81%97%E3%81%9F%EF%BC%81&url=https%3A%2F%2Finformatics.habatakijuku.com%2Fcpu-logic-game%2F" target="_blank" rel="noopener">𝕏 でシェア</a>
+        <button class="btn" id="btn-reset-all">🔄 最初から</button>
+      </div>
+    </section>
+    <div id="book-recommend"></div>
+  </main>
+
+  <footer>
+    <p>NO DOWNLOAD. NO REGISTRATION. JUST LEARN. &nbsp;© <span id="year"></span> ruglerugle</p>
+    <div class="footer-suits" aria-hidden="true"><span>⚡</span><span>🔌</span><span>➕</span><span>🧠</span></div>
+  </footer>
+</div>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+<script src="js/stages.js?v=20261108c"></script>
+<script src="js/progress.js?v=20261108c"></script>
+<script>QUEST.initCompletePage();</script>
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

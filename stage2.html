@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2733">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE2 トランジスタとNOT ― 論理回路CPUクエスト</title>
+<meta name="description" content="指で押すのではなく、電気で切り替わるスイッチ＝トランジスタ。ゲート電極の電圧で電子が集まり通り道ができる仕組みと、nMOS・pMOS を2個組み合わせた NOT 回路（CMOS）を、断面と回路の両方で確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/cpu-logic-game/stage2">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="論理回路CPUクエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE2 トランジスタとNOT ― 論理回路CPUクエスト">
+<meta property="og:description" content="電気で切り替わるスイッチ、トランジスタ。2個組み合わせると「反対を出す」NOT回路になる。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/cpu-logic-game/stage2">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/cpu-logic-game.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108c">
+<link rel="stylesheet" href="circuit.css?v=20261108c">
+<script src="js/stages.js?v=20261108c"></script>
+<script src="js/progress.js?v=20261108c"></script>
+<script src="js/circuit.js?v=20261108c"></script>
+<script src="js/labs.js?v=20261108c"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">⚡</a> <span>論理回路CPUクエスト</span></div>
+      <div class="brand-sub">STAGE 2 ― トランジスタとNOT ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 10</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 2</span><h1 class="chapter-title">トランジスタとNOT</h1>
+        <div class="chapter-sub">電気で切り替わるスイッチ</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">トランジスタがどうやって「通す・通さない」を切り替えるのかを理解し、nMOS と pMOS で作る NOT 回路の動きを説明しよう。NOT の回路の課題を解き、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">前回の終わりに、きみが大事な問題を出したね。数をスイッチで表せても、計算するには<strong>あるスイッチの状態で、別のスイッチを切り替える</strong>必要がある。今日はその部品、<strong>トランジスタ</strong>の中を見よう。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">電気で切り替わるスイッチ……。電磁石で鉄の板を引きつけて、接点をくっつけるような仕組みですか？ 理科で電磁石を作ったので。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">実際、昔のコンピュータにはその仕組みのスイッチ（リレーと呼ぶ）が使われていたんだ。でも動く部品は遅いし、すぐにすり減る。いまのトランジスタには動く部品が1つもない。使うのは<strong>シリコン</strong>という物質だ。砂の主な成分に含まれている元素だね。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">動かないのに、通したり通さなかったりできるんですか。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">シリコンは、ふだんは電気をとても通しにくい。銅の線とガラスの中間くらいの性質で、こういう物質を<strong>半導体</strong>と呼ぶ。ここに、ごく少しだけ別の元素を混ぜると、自由に動ける電子がたくさんある部分を作れる。トランジスタは、その「電子がたくさんある部分」を2か所、少し離して作ったものなんだ。片方を<strong>ソース</strong>、もう片方を<strong>ドレイン</strong>と呼ぶ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> ソースとドレインの間は、ふつうのシリコンのままだから電気を通しにくい。だから、そのままだと「通さない」状態ですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。そこで、間の部分の真上に、<strong>うすい絶縁膜</strong>（電気をまったく通さない膜）をはさんで、金属などでできた電極をのせる。この電極を<strong>ゲート電極</strong>と呼ぶ。ゲート電極にプラスの電圧をかけると、何が起きると思う？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">プラスとマイナスは引き合うから……シリコンの中のマイナスの電子が、ゲート電極のほうへ引き寄せられます。でも絶縁膜があるので、電極までは行けない。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">その通り。行き場を失った電子は、<strong>絶縁膜のすぐ下</strong>にびっしり並ぶ。すると、そこに電子の多い薄い層ができて、ソースとドレインがつながるんだ。この層を<strong>チャネル</strong>（通り道）と呼ぶ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">ゲート電極に電圧をかけると通り道ができて「通す」、電圧をやめると電子が散らばって「通さない」。電磁石みたいに何かが動くわけじゃなくて、電子の集まり方が変わるだけなんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。これは磁石の力ではなく、プラスとマイナスが引き合う<strong>電気の力</strong>なんだ。電気の力が届く空間を「電場（電界）」と呼ぶので、この部品は<strong>電界効果トランジスタ</strong>、英語の頭文字で <strong>MOSFET</strong>（モスフェット）と呼ばれている。</div>
+        </div>
+      </div>
+      <div class="lab" data-lab="mosfet"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">ゲート電極は絶縁膜で切り離されているから、ゲート電極そのものには電流がほとんど流れ込まないですよね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">いいところに気づいたね。それがとても大事な性質なんだ。ゲート電極は「電圧がかかっているかどうか」を感じるだけで、電流をほとんど食べない。だから、1つの回路の出力で、たくさんのトランジスタのゲート電極を同時に動かせる。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ここまでのトランジスタは、ゲート電極が<strong>1のとき通す</strong>型だった。電子を集めて通り道を作るので<strong>nMOS</strong>と呼ぶ（n はマイナスの電子を表す negative の頭文字）。実はもう1種類、作り方を逆にして、ゲート電極が<strong>0のとき通す</strong>型も作れる。こちらは<strong>pMOS</strong>と呼ぶ。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">nMOS：ゲート電極が 1 → 通す ／ 0 → 通さない</span>
+        <span class="step">pMOS：ゲート電極が 0 → 通す ／ 1 → 通さない（nMOS と反対）</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">正反対の2種類があると、面白いものが作れる。電源（いつも1）と地面（いつも0）の間に、<strong>上に pMOS、下に nMOS</strong> を縦に並べ、2つのゲート電極を同じ入力 A につなぐ。2つのトランジスタの間から、出力 OUT を取り出す。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> A＝0 のときは、pMOS が通して nMOS が通さない。だから OUT は上の電源とつながって 1。A＝1 のときは、pMOS が通さなくて nMOS が通すから、OUT は下の地面とつながって 0……入力の反対が出てきます。</div>
+        </div>
+      </div>
+      <div class="lab" data-lab="cmos"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">入力の反対を出す回路を <strong>NOT</strong>（ノット、「〜でない」という意味）と呼ぶ。そして、この「pMOS と nMOS を組にする」作り方を <strong>CMOS</strong>（シーモス）と呼ぶ。いまのCPUは、ほとんどがこの作り方でできているんだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">どうして組にするんですか？ たとえば、nMOS 1個と電球だけでも、反対を出す回路は作れそうです。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">作れるし、昔はそうしていた。でも、その作り方だと A＝1 のあいだ、電源から地面へ電流が流れっぱなしになる。CMOS では、A がどちらの値でも<strong>上か下のどちらか一方が必ず「通さない」</strong>から、電源から地面へ電流が流れ抜ける道がない。電気を使うのは、切り替わる一瞬だけなんだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">だからスマホの中に何十億個も入れても、電池がもつんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そういうこと。さて、ここからは一段上の見方に切り替えよう。トランジスタを何個か組み合わせて「入力が決まれば出力が決まる」箱にしたものを、<strong>論理ゲート</strong>と呼ぶ。NOT はいちばん小さな論理ゲートだ。トランジスタの「ゲート電極」と名前が似ていてまぎらわしいけれど、こちらは回路のまとまり全体の名前だよ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">論理ゲートの動きは、表でまとめられる。入力のあり得る値をすべて並べて、それぞれの出力を書いた表を<strong>真理値表</strong>と呼ぶ。NOT ならこうなる。</div>
+        </div>
+      </div>
+      <table class="tt"><tr><th>A</th><th>OUT</th></tr><tr><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td></tr></table>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">「真理値」って、1を「本当」、0を「うそ」と読むからですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。論理学では、ある文が正しいことを「真」、正しくないことを「偽」と呼んで、それを1と0で表す。ゲートは「真か偽か」の計算をする箱でもあるんだ。ここからは、ゲートの中のトランジスタは気にせず、箱として組み合わせていく。</div>
+        </div>
+      </div>
+      <div class="cp" id="pz-s2-not"></div>
+      <script>
+      CircuitPuzzle.mount(document.getElementById("pz-s2-not"), {
+        id: "cpu-s2-not", title: "NOT で反転させる",
+        desc: "入力 A の反対を OUT に出そう。A を 1 にすると OUT が 0、A を 0 にすると OUT が 1 になれば合格。",
+        inputs: ["A"], outputs: ["OUT"], gates: ["NOT"], height: 200,
+        truth: function (A) { return [A ? 0 : 1]; },
+        solution: function (k) { var g = k.add("NOT", 0.45, 0.5); k.wire(k.inp[0], g); k.wire(g, k.out[0]); }
+      });
+      </script>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">NOT を2個続けてつないだら、反対の反対で、元に戻りますね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。NOT を2回通すと元の値に戻る。当たり前に見えるけれど、この性質はあとで何度も使うよ。次は入力が2本ある論理ゲート、AND と OR だ。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. nMOS トランジスタで、ソースとドレインの間に通り道（チャネル）ができる理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">ゲート電極が磁石になって、電子を引きつけるから</button>
+          <button class="choice-btn">ゲート電極から絶縁膜を通って、電子が流れ込むから</button>
+          <button class="choice-btn">ゲート電極のプラスの電圧に電子が引き寄せられ、絶縁膜の下に並ぶから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ プラスとマイナスが引き合う電気の力（電界）で電子が集まる。絶縁膜があるので、ゲート電極そのものには電流はほとんど流れない。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. CMOS の NOT 回路で、入力 A＝1 のときに起きることは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">pMOS が通して、OUT は電源とつながり 1 になる</button>
+          <button class="choice-btn">nMOS が通して、OUT は地面とつながり 0 になる</button>
+          <button class="choice-btn">pMOS と nMOS の両方が通して、電源から地面へ電流が流れる</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ nMOS はゲート電極が1で通し、pMOS は1で通さない。OUT は地面側とつながるので 0。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. CMOS が電気をあまり使わない理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">どちらの入力でも上下どちらかが必ず「通さない」ので、電源から地面へ電流が流れ抜けないから</button>
+          <button class="choice-btn">トランジスタが動く部品を持たないから</button>
+          <button class="choice-btn">電源の電圧を 0 にしているから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 動く部品がないのは MOSFET 全般の長所。電気を食わないのは、上下が交互に切れて電源と地面が直接つながらない CMOS の組み方のおかげ。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage1.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(2);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

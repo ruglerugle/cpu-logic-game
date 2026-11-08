@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2733">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE6 NANDだけで全部作れる ― 論理回路CPUクエスト</title>
+<meta name="description" content="NAND（AND の反対）は CMOS でトランジスタ4個という一番少ない部品で作れ、しかも NAND だけで NOT・AND・OR を全部作れる。トランジスタの直列・並列から NAND の中身を説明し、万能ゲートであることを自分の回路で証明する。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/cpu-logic-game/stage6">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="論理回路CPUクエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE6 NANDだけで全部作れる ― 論理回路CPUクエスト">
+<meta property="og:description" content="NAND 1種類で全部作れる。トランジスタ4個の NAND と、万能ゲートの証明。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/cpu-logic-game/stage6">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/cpu-logic-game.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108c">
+<link rel="stylesheet" href="circuit.css?v=20261108c">
+<script src="js/stages.js?v=20261108c"></script>
+<script src="js/progress.js?v=20261108c"></script>
+<script src="js/circuit.js?v=20261108c"></script>
+<script src="js/labs.js?v=20261108c"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">⚡</a> <span>論理回路CPUクエスト</span></div>
+      <div class="brand-sub">STAGE 6 ― NANDだけで全部作れる ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 10</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 6</span><h1 class="chapter-title">NANDだけで全部作れる</h1>
+        <div class="chapter-sub">万能ゲート</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">NAND が「万能ゲート」と呼ばれる理由を説明できるようになろう。NAND・NAND で NOT・NAND で AND・NAND で OR の4つの課題を解き、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">STAGE3 で、AND をトランジスタでどう組むかは「少し工夫が要る」と言って、先送りにしていたね。今日はその続きだ。CMOS では、出力を電源（1）につなぐ pMOS の組と、地面（0）につなぐ nMOS の組を、必ず<strong>反対の働き</strong>になるように作る。NOT のときは、pMOS 1個と nMOS 1個だった。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">片方が通すときは、もう片方が必ず通さない。だから電源と地面が直接つながらない、という話でした。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。では入力が A と B の2本のとき、地面側に <strong>nMOS を2個、直列</strong>に並べてみる。出力が地面とつながって 0 になるのはどんなとき？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 直列だから、2つとも通すとき。nMOS は 1 で通すので、A も B も 1 のときだけ、出力が 0 になります。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">電源側は、その反対の働きにしなければいけない。「A と B が両方 1」以外のときに、出力を電源につなぐ。そのためには <strong>pMOS を2個、並列</strong>に置く。pMOS は 0 で通すから、A か B のどちらかが 0 なら、どちらかの pMOS が通して出力が 1 になる。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">地面側：nMOS 2個を直列 → A＝1 かつ B＝1 のときだけ出力を 0 にする</span>
+        <span class="step">電源側：pMOS 2個を並列 → A＝0 または B＝0 なら出力を 1 にする</span>
+        <span class="step">結果：出力は「A AND B」のちょうど反対。トランジスタは 4 個</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">出てきたのは AND じゃなくて、AND の反対ですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。CMOS の組み方では、トランジスタを1段だけ使うと、どうしても<strong>反対の答え</strong>が出てくる。NOT のときもそうだったね。この「AND の反対」を、NOT AND を縮めて <strong>NAND</strong>（ナンド）と呼ぶ。</div>
+        </div>
+      </div>
+      <table class="tt"><tr><th>A</th><th>B</th><th>AND</th><th>NAND</th></tr><tr><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td class="hl">0</td></tr></table>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">じゃあ、AND を作るには NAND の後ろに NOT を付けるしかない。4個＋2個で、トランジスタが 6 個要るんですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そういうこと。CMOS では、AND より NAND のほうが部品が少なく、速く動く。同じように考えると、nMOS を並列・pMOS を直列にした4個の回路は「OR の反対」、NOR（ノア）になる。設計者は NAND や NOR を好んで使うんだ。</div>
+        </div>
+      </div>
+      <div class="cp" id="pz-s6-nand"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ここからが今日の本題だ。<strong>NAND だけ</strong>で、NOT・AND・OR を全部作れるかどうか。まず NOT から。NAND は入力が2本あるけれど、NOT は入力が1本だ。どうしようか。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 2本の入力の両方に、同じ A をつないでしまうのはどうですか。A＝0 なら、0 と 0 の NAND で 1。A＝1 なら、1 と 1 の NAND で 0。反対が出てきます。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">NOT A ＝ A NAND A　（NAND 1個）</span>
+      </div>
+      <div class="cp" id="pz-s6-not"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">次は AND だ。NAND は「AND の反対」だった。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">反対の反対で元に戻すので、NAND の出力を、いま作った「NAND で作った NOT」に通せばいい。NAND 2個です。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">A AND B ＝ NOT ( A NAND B ) ＝ ( A NAND B ) NAND ( A NAND B )　（NAND 2個）</span>
+      </div>
+      <div class="cp" id="pz-s6-and"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">最後に OR。これは STAGE4 のド・モルガンの法則を思い出すといい。OR を「NOT と AND」で書いた式があったね。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">A OR B ＝ NOT ( (NOT A) AND (NOT B) ) でした。……あ、「NOT ( 何か AND 何か )」は、そのまま NAND です。だから A OR B ＝ (NOT A) NAND (NOT B)。NOT A と NOT B は、それぞれ NAND 1個で作れる。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">A OR B ＝ NOT ( (NOT A) AND (NOT B) )　（ド・モルガンの法則）</span>
+        <span class="step">＝ (NOT A) NAND (NOT B) ＝ ( A NAND A ) NAND ( B NAND B )　（NAND 3個）</span>
+      </div>
+      <div class="cp" id="pz-s6-or"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">これで NOT・AND・OR が NAND だけで作れた。前のステージで、XOR は AND・OR・NOT から作れることも確かめたね。ということは？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">XOR も NAND だけで作れる。それに、どんな「もし〜なら」の判断も「かつ・または・でない」に分解できるなら……どんな論理回路も NAND だけで作れる、ということですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。この性質を持つゲートを<strong>万能ゲート</strong>と呼ぶ。NAND は万能ゲートなんだ（NOR も同じく万能）。工場からすれば、NAND という1種類の部品をきれいに作れれば、あとは配線の問題になる。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">本物の CPU も、全部 NAND だけでできているんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">「全部 NAND だけ」ではないんだ。実際の設計では、NAND・NOR・NOT のほかに、「AND してから OR してから反転」までをトランジスタ1段でまとめた複合ゲートなども使って、少しでも速く、少しでも電気を使わないように組んでいる。万能ゲートの話は「理屈の上では1種類で足りる」ということで、実際の CPU は、その理屈の上でいろいろな部品を使い分けている。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">次のステージでは、いよいよ足し算の回路を作る。ここからは、NAND で作れることが分かった AND・OR・XOR を、また箱として使っていこう。</div>
+        </div>
+      </div>
+      <script>
+      CircuitPuzzle.mount(document.getElementById("pz-s6-nand"), {
+        id: "cpu-s6-nand", title: "NAND",
+        desc: "A と B が両方 1 のときだけ OUT＝0、それ以外は OUT＝1 にしよう。",
+        inputs: ["A", "B"], outputs: ["OUT"], gates: ["NAND"], height: 220,
+        truth: function (A, B) { return [A && B ? 0 : 1]; },
+        solution: function (k) { var g = k.add("NAND", 0.45, 0.5); k.wire(k.inp[0], g, 0); k.wire(k.inp[1], g, 1); k.wire(g, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s6-not"), {
+        id: "cpu-s6-not", title: "NAND で NOT",
+        desc: "NAND だけを使って、A の反対を OUT に出そう。",
+        inputs: ["A"], outputs: ["OUT"], gates: ["NAND"], height: 200,
+        truth: function (A) { return [A ? 0 : 1]; },
+        solution: function (k) { var g = k.add("NAND", 0.45, 0.5); k.wire(k.inp[0], g, 0); k.wire(k.inp[0], g, 1); k.wire(g, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s6-and"), {
+        id: "cpu-s6-and", title: "NAND で AND",
+        desc: "NAND だけを使って、A AND B を作ろう。",
+        inputs: ["A", "B"], outputs: ["OUT"], gates: ["NAND"], height: 220,
+        truth: function (A, B) { return [A && B ? 1 : 0]; },
+        solution: function (k) { var g1 = k.add("NAND", 0.33, 0.5), g2 = k.add("NAND", 0.62, 0.5); k.wire(k.inp[0], g1, 0); k.wire(k.inp[1], g1, 1); k.wire(g1, g2, 0); k.wire(g1, g2, 1); k.wire(g2, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s6-or"), {
+        id: "cpu-s6-or", title: "NAND で OR",
+        desc: "NAND だけを使って、A OR B を作ろう。",
+        inputs: ["A", "B"], outputs: ["OUT"], gates: ["NAND"], height: 240,
+        truth: function (A, B) { return [A || B ? 1 : 0]; },
+        solution: function (k) { var na = k.add("NAND", 0.28, 0.25), nb = k.add("NAND", 0.28, 0.75), g = k.add("NAND", 0.62, 0.5); k.wire(k.inp[0], na, 0); k.wire(k.inp[0], na, 1); k.wire(k.inp[1], nb, 0); k.wire(k.inp[1], nb, 1); k.wire(na, g, 0); k.wire(nb, g, 1); k.wire(g, k.out[0]); }
+      });
+      </script>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. CMOS の NAND は、トランジスタをどう組んだもの？</p>
+        <div class="choice-list">
+          <button class="choice-btn">地面側に nMOS 2個を並列、電源側に pMOS 2個を直列（合計4個）</button>
+          <button class="choice-btn">地面側に nMOS 2個を直列、電源側に pMOS 2個を並列（合計4個）</button>
+          <button class="choice-btn">nMOS 1個と pMOS 1個（合計2個）</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ nMOS の直列は「両方 1 のときだけ」地面とつながり出力 0。電源側はその反対になるよう pMOS を並列にする。逆の組み方は NOR になる。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. NAND の2本の入力に同じ信号 A をつなぐと、何になる？</p>
+        <div class="choice-list">
+          <button class="choice-btn">NOT</button>
+          <button class="choice-btn">AND</button>
+          <button class="choice-btn">いつも 1</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ A＝0 なら 0 NAND 0＝1、A＝1 なら 1 NAND 1＝0。反対が出てくるので NOT。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. 「NAND は万能ゲート」の正しい意味は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">実際の CPU は NAND 以外の部品を1つも使っていない</button>
+          <button class="choice-btn">NAND はどんなゲートよりも速く動く</button>
+          <button class="choice-btn">NAND だけを組み合わせれば、どんな論理回路でも作れる</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ NOT・AND・OR が NAND で作れるので、理屈の上ではどんな回路も NAND だけで作れる。実際の CPU は NOR や複合ゲートなども使い分けている。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage5.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(6);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

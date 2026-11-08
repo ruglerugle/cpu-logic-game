@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2733">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE8 桁あふれとマイナスの数 ― 論理回路CPUクエスト</title>
+<meta name="description" content="4ビットに収まらない答えはどうなるのか（桁あふれ）。0000 から 1 を引くと 1111 になることから、マイナスの数の表し方「2の補数」を組み立て、引き算を「反転して1を足す」足し算に変える回路を作る。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/cpu-logic-game/stage8">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="論理回路CPUクエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE8 桁あふれとマイナスの数 ― 論理回路CPUクエスト">
+<meta property="og:description" content="桁あふれとマイナスの数。2の補数で、引き算を足し算の回路でやる。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/cpu-logic-game/stage8">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/cpu-logic-game.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108c">
+<link rel="stylesheet" href="circuit.css?v=20261108c">
+<script src="js/stages.js?v=20261108c"></script>
+<script src="js/progress.js?v=20261108c"></script>
+<script src="js/circuit.js?v=20261108c"></script>
+<script src="js/labs.js?v=20261108c"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">⚡</a> <span>論理回路CPUクエスト</span></div>
+      <div class="brand-sub">STAGE 8 ― 桁あふれとマイナスの数 ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 10</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 8</span><h1 class="chapter-title">桁あふれとマイナスの数</h1>
+        <div class="chapter-sub">2の補数で引き算</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">桁あふれと2の補数のしくみを説明できるようになろう。「反転スイッチ」と「2ビットの足し算・引き算回路」の2つの課題を解き、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">前のステージの2ビットの足し算では、答えのために3ビット用意した。でも CPU の中では、数を入れる場所のビット数は決まっている。たとえば4ビットの場所しかないのに、1111（15）に 0001（1）を足したらどうなるかな。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 筆算すると、全部の桁で繰り上がって 10000 になります。でも4ビットしか入らないなら、一番上の 1 は入る場所がなくて、残るのは 0000。15＋1 が 0 になってしまう。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。入りきらなかった繰り上がりがこぼれ落ちることを<strong>桁あふれ</strong>（オーバーフロー）と呼ぶ。自転車や車の走行距離のメーターを見たことがあるかな。99999 km の次は？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">00000 に戻ります。それと同じですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">時計の針のように、ぐるっと回って元に戻る。4ビットの数は 0000 から 1111 の16個が輪になって並んでいる、と考えるといい。</div>
+        </div>
+      </div>
+      <div class="lab" data-lab="wheel"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">ここで逆向きを考えよう。メーターが 0000 のとき、1 戻したら何が表示される？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">輪を逆に回るから、1111 です。……あれ、0 から 1 引いたら −1 のはずなのに、1111 が出てくる。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そこが今日の話の入り口なんだ。1111 に 1 を足すと？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">0000 に戻ります（桁あふれして）。「1 を足すと 0 になる数」は、ふつうの数なら −1 です。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。4ビットの世界では、1111 を「−1」として扱っても、足し算の結果はつじつまが合う。同じように 1110 は −2、1101 は −3……と、0 から逆向きに数えた数をマイナスの数として使う。16個の並びのうち、半分の 0000〜0111 を 0〜7、残りの 1000〜1111 を −8〜−1 に割り当てるんだ。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">0000〜0111 → 0, 1, 2, …, 7</span>
+        <span class="step">1000〜1111 → −8, −7, …, −2, −1</span>
+        <span class="step">一番左のビットが 1 ならマイナス、0 ならプラス（または0）</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">同じ 1111 を、15 と読むか −1 と読むかは、どうやって決めるんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">回路は決めない。どちらで読んでも、足し算の回路は同じ0と1の並びを出すからね。プログラムを書く人が「この場所の数はマイナスもあり得る」と宣言して、読み方を決めている。それが、同じ回路で両方を扱える便利なところなんだ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">では、ある数 x のマイナス −x を、x からどうやって作るかを考えよう。手がかりとして、x と、x の全ビットを反転した NOT x を足してごらん。たとえば x＝0101 なら。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 0101 の反転は 1010。足すと、どの桁も 0＋1 か 1＋0 だから繰り上がりなしで 1111。……どんな x でも、各桁が「0 と 1」の組になるから、必ず 1111 になりますね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">1111 は何だった？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">−1 です。だから x ＋ NOT x ＝ −1。両辺に 1 を足すと x ＋ (NOT x ＋ 1) ＝ 0。つまり <strong>NOT x ＋ 1 が −x</strong> になっている、ということですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">その通り。「全ビットを反転して 1 を足す」と、マイナスの数が作れる。この表し方を<strong>2の補数</strong>と呼ぶ。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">x ＋ NOT x ＝ 1111 ＝ −1　（各桁が 0＋1 なので繰り上がりがない）</span>
+        <span class="step">→ x ＋ ( NOT x ＋ 1 ) ＝ 0　→　−x ＝ NOT x ＋ 1</span>
+        <span class="step">例：3 ＝ 0011 → 反転 1100 → ＋1 → 1101 ＝ −3</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">それなら、引き算 A − B は A ＋ (−B) だから、A ＋ NOT B ＋ 1。足し算の回路で引き算もできる、ということですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。引き算専用の回路を別に作らなくていい。必要なのは、B を反転する部品と、「＋1」の部品だけだ。しかも、どちらにもうまい手がある。まず反転。XOR の表をもう一度見てみよう。片方の入力を「切り替え信号 SUB」と考えて、SUB＝0 と SUB＝1 で分けて読んでごらん。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> SUB＝0 のときは、B XOR 0 で B がそのまま出る。SUB＝1 のときは、B XOR 1 で B の反対が出る。XOR は、SUB で「そのまま」と「反転」を切り替えるスイッチになるんですね。</div>
+        </div>
+      </div>
+      <div class="cp" id="pz-s8-inv"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">次に「＋1」。足し算回路の一番右の桁は、繰り上がりの入り口 Cin が空いているね。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">そこに SUB をつなげば、引き算のときだけ 1 が足される。B の各ビットは XOR で SUB と合わせて反転、一番右の桁の Cin にも SUB。これで SUB＝0 なら A＋B、SUB＝1 なら A＋NOT B＋1＝A−B。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">各桁：b′ ＝ B XOR SUB　（SUB＝1 のとき反転）</span>
+        <span class="step">一番右の桁の Cin ＝ SUB　（SUB＝1 のとき ＋1）</span>
+        <span class="step">結果 ＝ A ＋ b′ ＋ SUB　→ SUB＝0 で A＋B、SUB＝1 で A−B</span>
+      </div>
+      <div class="cp" id="pz-s8-addsub"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">2ビットで 01 − 10 を計算すると、1 − 2 で −1 だから 11 になるはず。2ビットのマイナスは 10 が −2、11 が −1 だから、合っています。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">最後に、マイナスの数を使うときの桁あふれにも注意しておこう。4ビットで 0111（7）に 1 を足すと？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">1000 です。……でもマイナスありの読み方だと、1000 は −8。7＋1 が −8 になってしまいました。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">プラスの一番大きい数を超えると、マイナスの一番小さい数に回り込む。だから CPU は、計算のたびに「いまの計算で桁あふれが起きたか」を<strong>フラグ</strong>（旗）と呼ぶ1ビットの印に記録して、プログラムが確かめられるようにしている。実際に問題になった例もある。多くのコンピュータは、1970年1月1日からの秒数を、マイナスありの32ビットで数えてきた。32ビットのプラスの最大は約21億秒で、それを超えるのが 2038年1月19日。そこで日付が1901年に回り込んでしまうので、「2038年問題」と呼ばれて、64ビットへの切り替えが進められている。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">32ビットでも足りなくなるんですね。桁の数を決めることが、そのまま使える数の範囲を決めている。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。次のステージでは、足し算・引き算・AND・OR……といういくつもの計算を、1つの部品にまとめる。CPU の計算係、ALU だ。</div>
+        </div>
+      </div>
+      <script>
+      CircuitPuzzle.mount(document.getElementById("pz-s8-inv"), {
+        id: "cpu-s8-inv", title: "反転スイッチ",
+        desc: "SUB＝0 のときは OUT＝B、SUB＝1 のときは OUT＝NOT B になる回路を作ろう。",
+        inputs: ["SUB", "B"], outputs: ["OUT"], gates: ["XOR", "AND", "OR", "NOT"], height: 220,
+        truth: function (SUB, B) { return [SUB ? (B ? 0 : 1) : B]; },
+        solution: function (k) { var g = k.add("XOR", 0.45, 0.5); k.wire(k.inp[0], g, 0); k.wire(k.inp[1], g, 1); k.wire(g, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s8-addsub"), {
+        id: "cpu-s8-addsub", title: "2ビットの足し算・引き算回路",
+        desc: "SUB＝0 なら R1 R0 ＝ A1 A0 ＋ B1 B0、SUB＝1 なら A1 A0 − B1 B0（2ビットに収まらない桁はこぼす）。B の各ビットを SUB と XOR し、一番右の桁に SUB を足す。",
+        inputs: ["SUB", "A1", "A0", "B1", "B0"], outputs: ["R1", "R0"], gates: ["XOR", "HA", "OR", "AND"], height: 380,
+        truth: function (SUB, A1, A0, B1, B0) {
+          var a = A1 * 2 + A0, b = B1 * 2 + B0;
+          var r = ((SUB ? a - b : a + b) % 4 + 4) % 4;
+          return [(r >> 1) & 1, r & 1];
+        },
+        solution: function (k) {
+          var SUB = k.inp[0], A1 = k.inp[1], A0 = k.inp[2], B1 = k.inp[3], B0 = k.inp[4];
+          var x0 = k.add("XOR", 0.18, 0.85), x1 = k.add("XOR", 0.18, 0.62);
+          var h1 = k.add("HA", 0.38, 0.85), h2 = k.add("HA", 0.58, 0.85), o = k.add("OR", 0.69, 0.6);
+          var y1 = k.add("XOR", 0.42, 0.3), y2 = k.add("XOR", 0.74, 0.25);
+          k.wire(B0, x0, 0); k.wire(SUB, x0, 1); k.wire(B1, x1, 0); k.wire(SUB, x1, 1);
+          k.wire(A0, h1, 0); k.wire(x0, h1, 1); k.wire(h1, h2, 0, 0); k.wire(SUB, h2, 1);
+          k.wire(h1, o, 0, 1); k.wire(h2, o, 1, 1);
+          k.wire(A1, y1, 0); k.wire(x1, y1, 1); k.wire(y1, y2, 0); k.wire(o, y2, 1);
+          k.wire(y2, k.out[0]); k.wire(h2, k.out[1], 0, 0);
+        }
+      });
+      </script>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. 4ビットで 1111 に 0001 を足すと、残る4ビットは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">1111</button>
+          <button class="choice-btn">10000</button>
+          <button class="choice-btn">0000</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 筆算の答えは 10000 だが、5桁目は入る場所がなくこぼれる（桁あふれ）。残る4ビットは 0000。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. 2の補数で、4ビットの −5 を作ると？</p>
+        <div class="choice-list">
+          <button class="choice-btn">1101</button>
+          <button class="choice-btn">1011</button>
+          <button class="choice-btn">0101</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 5＝0101 → 全ビット反転 1010 → 1 を足して 1011。確かめ：0101＋1011＝10000 で、4ビットは 0000。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. 引き算 A − B を足し算回路で計算できる理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">A − B ＝ A ＋ (NOT B ＋ 1) で、反転は XOR、＋1 は一番右の桁の繰り上がり入口でできるから</button>
+          <button class="choice-btn">回路の中に、引き算専用の部品が隠れているから</button>
+          <button class="choice-btn">2進数では引き算と足し算の答えが同じになるから</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ −B は NOT B ＋ 1（2の補数）。SUB 信号で B を XOR して反転し、同じ SUB を Cin に入れれば、同じ足し算回路が引き算もこなす。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage7.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(8);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

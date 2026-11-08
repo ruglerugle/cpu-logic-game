@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2733">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE10 覚える回路とCPU ― 論理回路CPUクエスト</title>
+<meta name="description" content="ここまでの回路は入力が変わると答えを忘れてしまう。出力を入力に戻す「輪」で値を覚えるラッチ、全体を足並みそろえて動かすクロック、値をしまうレジスタ。最後に、取り出す→解読する→実行する、の1サイクルで小さな CPU を動かす。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/cpu-logic-game/stage10">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="論理回路CPUクエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE10 覚える回路とCPU ― 論理回路CPUクエスト">
+<meta property="og:description" content="覚える回路とクロック、そして CPU の1サイクル。小さな CPU を自分で1段ずつ動かす。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/cpu-logic-game/stage10">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/cpu-logic-game.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108c">
+<link rel="stylesheet" href="circuit.css?v=20261108c">
+<script src="js/stages.js?v=20261108c"></script>
+<script src="js/progress.js?v=20261108c"></script>
+<script src="js/circuit.js?v=20261108c"></script>
+<script src="js/labs.js?v=20261108c"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">⚡</a> <span>論理回路CPUクエスト</span></div>
+      <div class="brand-sub">STAGE 10 ― 覚える回路とCPU ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 10</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 10</span><h1 class="chapter-title">覚える回路とCPU</h1>
+        <div class="chapter-sub">クロック・レジスタ・1サイクル</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">回路が値を覚えるしくみと、CPU が命令を1つずつこなす「取り出し→解読→実行」を説明できるようになろう。小さな CPU で2つのプログラムを最後まで動かし、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">最後のステージだ。ここまで作ってきた回路には、共通の弱点がある。足し算回路の入力を変えたら、答えはどうなる？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">すぐに新しい入力の答えに変わります。前の答えは消えてしまう。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。出力がそのときの入力だけで決まる回路を<strong>組み合わせ回路</strong>と呼ぶ。でも CPU は、計算した答えを覚えておいて、次の計算に使いたい。今日は「覚える回路」を作る。手がかりは、STAGE2 の最後にきみが言ったことだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">NOT を2回通すと元に戻る、ですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。では、NOT を2つつないだ出口を、最初の NOT の入口に<strong>戻して輪にしたら</strong>、どうなると思う？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 1つ目の NOT の入口が 1 なら、出口は 0。2つ目の NOT で 1 に戻って、それがまた1つ目の入口へ……ずっと 1 のまま回り続けます。0 から始めても、ずっと 0。輪の中で、値がそのまま保たれる。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。出力を入力へ戻すことを<strong>フィードバック</strong>と呼ぶ。輪にすると、入力が無くても値が残る。回路が「覚える」ことの正体は、これなんだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">でも、その輪は一度入れた値をずっと回すだけで、新しい値を書き込めませんよね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そこで、前のステージのマルチプレクサを使う。入力は、書き込みたい値 <strong>D</strong> と、書き込み許可 <strong>WE</strong>（Write Enable）。WE＝1 なら D を選び、WE＝0 なら<strong>自分の出力 Q</strong> を選んで、その結果を Q にする。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> WE＝1 のあいだは Q が D と同じになる。WE を 0 に戻すと、マルチプレクサは自分の出力 Q を選び続けるので、輪になって、最後の値が残る。そのあと D をいくら変えても、Q は変わらない。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">Q（新） ＝ WE が 1 なら D、WE が 0 なら Q（いまの値）</span>
+        <span class="step">WE＝1：書き込み（Q が D に合わせて変わる）／ WE＝0：保持（輪になって値が残る）</span>
+      </div>
+      <div class="lab" data-lab="latch"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">この1ビットを覚える回路を<strong>ラッチ</strong>（掛け金、という意味）と呼ぶ。実際の回路では、マルチプレクサを使わずに、NAND を2つたすき掛けにつないで輪を作ることが多いけれど、「出力を戻して輪にする」という考え方は同じだ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">ラッチを8個並べたら、8ビット、つまり1バイトを覚えられますね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。数を入れておく箱として CPU の中に置かれたものを<strong>レジスタ</strong>と呼ぶ。64ビットの CPU なら、64個並べたレジスタを何十個も持っている。それよりずっとたくさんの値を覚えておく<strong>メモリ</strong>は、1バイトずつの箱に<strong>番地</strong>という通し番号を付けて、何十億個も並べたものだ（メモリは、もっと小さく作れる別の仕組みで覚えているけれど、番地で箱を選ぶ考え方は同じ）。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">もう1つ大事な部品がある。足し算回路に新しい数を入れても、答えが出るまでには、ほんの少し時間がかかる。STAGE7 の繰り上がりの手渡しを思い出してごらん。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">繰り上がりが右から順に伝わるので、途中では、まだ正しくない答えが出ている時間がありますね。その途中の答えをレジスタに書き込んでしまったら困ります。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。そこで CPU 全体に、一定の間隔で 0 と 1 を繰り返す合図を配る。これを<strong>クロック</strong>と呼ぶ。レジスタは、クロックが 0 から 1 に切り替わる瞬間にだけ値を取り込むように作る（この作りのものを<strong>フリップフロップ</strong>と呼ぶ）。合図と合図の間に計算が落ち着くようにしておけば、レジスタはいつも正しい答えだけを受け取る。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">合図の間隔が短いほど、速く計算できる。……スマホの説明で「3GHz」と書いてあるのは、これですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。GHz（ギガヘルツ）は1秒間に10億回。3GHz なら、1秒に30億回の合図だ。1回の合図は、光でも10センチしか進めないくらいの短い時間なんだよ。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">では、部品を全部そろえて、CPU がプログラムを動かす様子を見よう。メモリには、<strong>命令</strong>と<strong>データ</strong>が同じように番地付きで入っている。CPU は、次に実行する命令の番地を覚えておく専用のレジスタを持っていて、これを<strong>プログラムカウンタ</strong>（PC）と呼ぶ。CPU がすることは、次の3つの繰り返しだけなんだ。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">① 取り出し：PC が指す番地から命令を読み出す。PC を1つ進める</span>
+        <span class="step">② 解読：命令の0と1の並びを読み、「どの計算か」「どの番地か」を表す信号に分ける（演算の種類は ALU のマルチプレクサへ）</span>
+        <span class="step">③ 実行：ALU で計算し、結果をレジスタやメモリに書き込む</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">命令も、メモリの中では0と1の並びなんですね。「LOAD」とか「ADD」も、数で表してある。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。命令ごとに番号が決まっていて、たとえば「ADD」は 0010 のように表される。その番号の部分を、②の解読でマルチプレクサの選択信号に回せば、ALU が足し算を選ぶ。STAGE9 でやったことが、ここでつながるんだ。</div>
+        </div>
+      </div>
+      <div class="lab" data-lab="cpu" data-id="cpu-s10-run" data-programs="add,loop"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">命令の中には、PC そのものを書き換えるものもある。たとえば「JZ 番地」は、ALU のゼロフラグが立っていたら、PC をその番地に書き換える命令だ（Jump if Zero の頭文字）。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> PC を前の番地に戻せば、同じ命令を何回もくり返せる。答えが 0 になったところで先へ飛べば、くり返しを抜けられる……ということですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。プログラムの「もし〜なら」も「〜のあいだくり返す」も、最後は<strong>フラグを見て PC を書き換えること</strong>でできている。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">トランジスタというスイッチから始まって、ゲート、足し算、選ぶ回路、覚える回路、そして命令を順番にこなす CPU まで来ました。最初の「スイッチしか無いのに、どうして計算できるのか」の答えが、全部この中にあります。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">よくここまで来たね。きみのスマホの CPU も、規模こそ違うけれど、やっていることはこの「取り出し・解読・実行」のくり返しだ。旅のまとめを見ておこう。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">① 数 → 0と1の並び（2進数）。マイナスは2の補数</span>
+        <span class="step">② スイッチ → トランジスタ（電気の力で通り道ができる）。2個で NOT（CMOS）</span>
+        <span class="step">③ 判断 → 論理ゲート（AND・OR・NOT・XOR）。NAND だけでも全部作れる</span>
+        <span class="step">④ 計算 → 全加算器を並べて足し算。反転＋1 で引き算</span>
+        <span class="step">⑤ 選ぶ → マルチプレクサ。ALU は全部計算して1つ選ぶ</span>
+        <span class="step">⑥ 覚える → 出力を戻した輪（ラッチ）とクロック。レジスタとメモリ</span>
+        <span class="step">⑦ 動かす → PC が指す命令を、取り出し・解読・実行でくり返す</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">メモリの中で番地がどう使われるのか、プログラムの中の変数がメモリのどこに置かれるのかは、『<a href="https://informatics.habatakijuku.com/memory-quest/" style="color:#8a5a2a;text-decoration:underline">メモリのしくみクエスト</a>』で続きを話そう。</div>
+        </div>
+      </div>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. 「組み合わせ回路」と「覚える回路」の違いは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">覚える回路は出力を入力へ戻した輪（フィードバック）を持ち、入力が変わっても値を保てる</button>
+          <button class="choice-btn">覚える回路はトランジスタを使わない</button>
+          <button class="choice-btn">組み合わせ回路のほうが、必ず部品が多い</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 組み合わせ回路の出力はそのときの入力だけで決まる。輪にすると、値が回り続けて残る。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. レジスタがクロックの切り替わる瞬間にだけ値を取り込む理由は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">電気を節約するため</button>
+          <button class="choice-btn">クロックが無いとトランジスタが動かないため</button>
+          <button class="choice-btn">計算の途中の、まだ正しくない答えを取り込まないようにするため</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ 足し算などは答えが落ち着くまで少し時間がかかる。合図と合図の間に落ち着かせ、合図の瞬間だけ取り込めば、正しい答えだけが残る。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. CPU がプログラムを動かすときに、くり返していることは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">解読 → 取り出し → 保存</button>
+          <button class="choice-btn">取り出し → 解読 → 実行（そのたびに PC が次の命令を指す）</button>
+          <button class="choice-btn">全部の命令を同時に実行する</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ PC が指す命令を取り出し、何をするか解読し、ALU などで実行する。PC を書き換える命令（ジャンプ）で、くり返しや条件分岐ができる。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage9.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>まとめへ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(10);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>

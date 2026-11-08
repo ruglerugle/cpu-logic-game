@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f2733">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9RTQCP2HXM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9RTQCP2HXM');
+</script>
+<title>STAGE4 ド・モルガンの法則 ― 論理回路CPUクエスト</title>
+<meta name="description" content="AND が無くても、NOT と OR があれば AND が作れる。「AND が 0 になるのはどんなとき？」から出発して、ド・モルガンの法則を自分で組み立て、真理値表と回路で確かめる。">
+<link rel="canonical" href="https://informatics.habatakijuku.com/cpu-logic-game/stage4">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="論理回路CPUクエスト">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="STAGE4 ド・モルガンの法則 ― 論理回路CPUクエスト">
+<meta property="og:description" content="AND を NOT と OR だけで作る。ド・モルガンの法則を真理値表で確かめる。">
+<meta property="og:url" content="https://informatics.habatakijuku.com/cpu-logic-game/stage4">
+<meta property="og:image" content="https://informatics.habatakijuku.com/images/ogp/cpu-logic-game.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="stylesheet" href="design-system.css?v=20261108c">
+<link rel="stylesheet" href="circuit.css?v=20261108c">
+<script src="js/stages.js?v=20261108c"></script>
+<script src="js/progress.js?v=20261108c"></script>
+<script src="js/circuit.js?v=20261108c"></script>
+<script src="js/labs.js?v=20261108c"></script>
+</head>
+<body>
+<div class="app-shell side-collapsed" id="app-shell">
+  <header class="game-header">
+    <div class="brand">
+      <div class="brand-title"><a class="head-reset home-badge" href="./" title="トップへ" aria-label="トップへ">⚡</a> <span>論理回路CPUクエスト</span></div>
+      <div class="brand-sub">STAGE 4 ― ド・モルガンの法則 ―</div>
+    </div>
+    <div class="head-progress-wrap">
+      <div class="head-progress-label" id="progress-label">クリア 0 / 10</div>
+      <div class="head-progress" role="progressbar" aria-label="クリア済みステージ数" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="head-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="header-actions">
+      <a class="head-reset" href="/" title="情報の冒険（シリーズの地図）へ">🧭 地図</a>
+      <button class="head-reset" id="btn-reset-all">🔄 最初から</button>
+      <button class="head-reset" id="head-nav-toggle" title="ステージ一覧の表示切替">☰ ナビ</button>
+    </div>
+  </header>
+
+  <div class="game-layout">
+    <div class="side-backdrop" id="side-backdrop"></div>
+    <aside class="side-panel">
+      <div class="side-head">
+        <button class="side-toggle" id="sidebar-toggle" title="ステージ一覧の表示切替" aria-label="ステージ一覧の表示切替">☰</button>
+        <span class="side-head-text">📚 ステージ一覧</span>
+      </div>
+      <div class="side-list" id="side-list"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="chapter-head">
+        <span class="chapter-badge">STAGE 4</span><h1 class="chapter-title">ド・モルガンの法則</h1>
+        <div class="chapter-sub">部品を入れ替える</div>
+      </div>
+
+      <div class="mission-box">
+        <div class="mission-label">🎯 ミッション</div>
+        <div class="mission-text">ド・モルガンの法則がなぜ成り立つかを、真理値表で説明できるようになろう。AND を NOT＋OR で、OR を NOT＋AND で作る2つの課題を解き、確認クイズに全問正解すれば合格。</div>
+        <span class="mission-status" id="mission-status">未達成</span>
+      </div>
+
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">今日は少し意地悪な問題から始めよう。手元に NOT と OR はたくさんあるのに、AND が1つもない。それでも「A かつ B」の回路を作れるだろうか。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">OR は「1つでもあれば1」で、AND は「全部そろったら1」。性格が逆っぽいので、OR から AND を作れる気がしません。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">正面からだと難しいね。そこで、向きを変えて考えよう。AND の出力が <strong>0</strong> になるのは、どんなときかな。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 真理値表で AND が 0 なのは、00、01、10 の3行です。共通しているのは……A か B の<strong>少なくとも1つが 0</strong> のとき。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">では、「A が 0」を、NOT を使って言い直すと？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">NOT A が 1、です。同じように「B が 0」は「NOT B が 1」。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">すると、「A か B の少なくとも1つが 0」は、どう言い換えられる？</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> 「NOT A が 1」または「NOT B が 1」……「少なくとも1つ」は OR だから、<strong>NOT A OR NOT B</strong> が 1、ということですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">その通り。ここまでで分かったことを式にすると、「AND が 0 のときに 1 になるもの」が作れた。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">A AND B が 0 ⇔ A か B の少なくとも1つが 0 ⇔ (NOT A) OR (NOT B) が 1</span>
+        <span class="step">つまり (NOT A) OR (NOT B) は、A AND B の「反対」になっている</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">欲しいのは AND そのものだから……反対の反対にすればいい。前のステージで、NOT を2回通すと元に戻るとやったので、最後に NOT をもう1つ付けます。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。こうなる。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">A AND B ＝ NOT ( (NOT A) OR (NOT B) )</span>
+        <span class="step">使う部品：NOT が3個、OR が1個。AND は使わない</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">本当に正しいかは、4行全部を計算して確かめるのが確実だ。真理値表に途中の列を足していくよ。</div>
+        </div>
+      </div>
+      <table class="tt"><tr><th>A</th><th>B</th><th>NOT A</th><th>NOT B</th><th>(NOT A) OR (NOT B)</th><th>その NOT</th><th>A AND B</th></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td class="hl">0</td><td>0</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td class="hl">0</td><td>0</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td class="hl">0</td><td>0</td></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td class="hl">1</td><td>1</td></tr></table>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">最後の2列が4行とも一致しています。</div>
+        </div>
+      </div>
+      <div class="cp" id="pz-s4-and"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">いまの関係は、19世紀イギリスの数学者オーガスタス・ド・モルガンの名前をとって、<strong>ド・モルガンの法則</strong>と呼ばれている。ふつうは、両辺に NOT をかけた形で書くことが多い。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">ド・モルガンの法則（その1）：NOT ( A AND B ) ＝ (NOT A) OR (NOT B)</span>
+        <span class="step">ド・モルガンの法則（その2）：NOT ( A OR B ) ＝ (NOT A) AND (NOT B)</span>
+      </div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">その2のほうも、同じ考え方で確かめられますか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">やってごらん。今度は OR が 0 になるのはどんなときかを考えるといい。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbitThink.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble"> OR が 0 になるのは 00 の行だけ、つまり A も B も 0 のとき。「A が 0 かつ B が 0」は「NOT A が 1 かつ NOT B が 1」だから、(NOT A) AND (NOT B) が 1。これが「OR が 0」と同じなので、NOT(A OR B) ＝ (NOT A) AND (NOT B)。その1と同じ形になりました。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。AND と OR を入れ替えて、全部に NOT を付けると、もう一方になる。だから、OR が無くても NOT と AND から OR を作れる。</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="step">A OR B ＝ NOT ( (NOT A) AND (NOT B) )</span>
+      </div>
+      <div class="cp" id="pz-s4-or"></div>
+      <div class="dialogue-scene">
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">ふだんの言葉にも当てはまりますか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">当てはまるよ。「明日は雨でも風でもない」という文は、「雨が降る OR 風が吹く」の否定だね。法則その2によれば、それは何と同じかな。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">「雨が降らない」かつ「風が吹かない」。たしかに同じ意味です。逆に「雨が降って、しかも風も吹く、ということはない」は、その1で「雨が降らない、または、風が吹かない」。どちらか片方は外れている、という意味ですね。</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">そう。否定すると「かつ」と「または」が入れ替わる。文章を読み違えやすいところだから、プログラムを書くときにも役に立つ。</div>
+        </div>
+        <div class="dialog-row right">
+          <div class="dialog-character">
+            <div class="dialog-avatar student"><img src="images/rabbit.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name student">うさ美</div>
+          </div>
+          <div class="dialog-bubble">でも、AND があるなら最初から AND を使えばいいのに、どうして作り直すんですか？</div>
+        </div>
+        <div class="dialog-row">
+          <div class="dialog-character">
+            <div class="dialog-avatar mentor"><img src="images/cat.webp" width="300" height="386" alt=""></div>
+            <div class="dialog-name mentor">ねこ博士</div>
+          </div>
+          <div class="dialog-bubble">理由は2つある。1つは、工場で作るときに、部品の種類が少ないほど作りやすく、検査もしやすいこと。もう1つは、ゲートの種類によってトランジスタの数が違うから、同じ働きをもっと少ない部品で作れる組み方を探したいこと。今日の考え方を進めると、<strong>たった1種類のゲートだけで全部を作る</strong>ことができる。それが STAGE6 の話だ。その前に、次はもう1つの大事なゲートを作っておこう。</div>
+        </div>
+      </div>
+      <script>
+      CircuitPuzzle.mount(document.getElementById("pz-s4-and"), {
+        id: "cpu-s4-and", title: "AND を NOT と OR で作る",
+        desc: "AND は使えない。NOT と OR だけで、A と B が両方 1 のときだけ OUT＝1 になる回路を作ろう。",
+        inputs: ["A", "B"], outputs: ["OUT"], gates: ["NOT", "OR"], height: 240,
+        truth: function (A, B) { return [A && B ? 1 : 0]; },
+        solution: function (k) { var n1 = k.add("NOT", 0.22, 0.25), n2 = k.add("NOT", 0.22, 0.75), o = k.add("OR", 0.47, 0.5), n3 = k.add("NOT", 0.68, 0.5); k.wire(k.inp[0], n1); k.wire(k.inp[1], n2); k.wire(n1, o, 0); k.wire(n2, o, 1); k.wire(o, n3); k.wire(n3, k.out[0]); }
+      });
+      CircuitPuzzle.mount(document.getElementById("pz-s4-or"), {
+        id: "cpu-s4-or", title: "OR を NOT と AND で作る",
+        desc: "OR は使えない。NOT と AND だけで、A と B の少なくとも1つが 1 なら OUT＝1 になる回路を作ろう。",
+        inputs: ["A", "B"], outputs: ["OUT"], gates: ["NOT", "AND"], height: 240,
+        truth: function (A, B) { return [A || B ? 1 : 0]; },
+        solution: function (k) { var n1 = k.add("NOT", 0.22, 0.25), n2 = k.add("NOT", 0.22, 0.75), a = k.add("AND", 0.47, 0.5), n3 = k.add("NOT", 0.68, 0.5); k.wire(k.inp[0], n1); k.wire(k.inp[1], n2); k.wire(n1, a, 0); k.wire(n2, a, 1); k.wire(a, n3); k.wire(n3, k.out[0]); }
+      });
+      </script>
+
+      <h2 class="quiz-head">確認クイズ</h2>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q1. NOT ( A OR B ) と同じものは？</p>
+        <div class="choice-list">
+          <button class="choice-btn">(NOT A) AND (NOT B)</button>
+          <button class="choice-btn">(NOT A) OR (NOT B)</button>
+          <button class="choice-btn">A AND B</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ ド・モルガンの法則その2。OR が 0 になるのは A も B も 0 のときだけなので、その反対は「NOT A かつ NOT B」。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q2. 「宿題が終わった、かつ、部屋を片付けた」が成り立たない、と同じ意味の文は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">宿題が終わっていない、かつ、部屋を片付けていない</button>
+          <button class="choice-btn">宿題が終わった、または、部屋を片付けた</button>
+          <button class="choice-btn">宿題が終わっていない、または、部屋を片付けていない</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ NOT(A AND B)＝(NOT A) OR (NOT B)。どちらか片方でも欠けていれば「両方そろった」は成り立たない。</div>
+      </div>
+      <div class="quiz-card" data-quiz>
+        <p class="quiz-q">Q3. NOT と OR だけで AND を作るとき、必要な NOT の数は？</p>
+        <div class="choice-list">
+          <button class="choice-btn">1個</button>
+          <button class="choice-btn">3個</button>
+          <button class="choice-btn">2個</button>
+        </div>
+        <div class="quiz-explain" hidden>正解！ A と B をそれぞれ反転するのに2個、OR の出力をもう一度反転するのに1個。NOT((NOT A) OR (NOT B))。</div>
+      </div>
+
+      <div class="stage-nav">
+        <a class="btn" href="stage3.html">← 前のステージ</a>
+        <button class="btn btn-primary" id="btn-next" disabled>次へ →</button>
+      </div>
+
+      <div id="book-recommend"></div>
+    </main>
+  </div>
+</div>
+
+<script>QUEST.initStagePage(4);</script>
+
+<script src="https://my.habatakijuku.com/sync.js" defer></script>
+</body>
+</html>
